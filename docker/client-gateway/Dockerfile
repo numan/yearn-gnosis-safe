@@ -1,0 +1,1 @@
+FROM gnosispm/safe-client-gateway:v3.10.0
