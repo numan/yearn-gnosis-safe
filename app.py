@@ -11,6 +11,10 @@ environment = cdk.Environment(
     region=os.environ.get("CDK_DEPLOY_REGION", os.environ["CDK_DEFAULT_REGION"]),
 )
 
-YearnGnosisSafeStack(app, "GnosisSafeStack", env=environment)
+environment_name = "production"
+prod_stack = YearnGnosisSafeStack(
+    app, "GnosisSafeStack", environment_name=environment_name, env=environment
+)
+cdk.Tags.of(prod_stack).add("environment", environment_name)
 
 app.synth()

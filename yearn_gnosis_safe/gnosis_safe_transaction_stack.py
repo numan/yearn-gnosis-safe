@@ -65,7 +65,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
             "SafeTransactionServiceWeb",
             cpu=512,
             memory_limit_mib=1024,
-            family="SafeTransactionService",
+            family="GnosisSafeServices",
             volumes=[
                 ecs.Volume(
                     name="nginx_volume",
@@ -127,7 +127,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
             "SafeTransactionServiceWorker",
             cpu=512,
             memory_limit_mib=1024,
-            family="SafeTransactionService",
+            family="GnosisSafeServices",
         )
 
         worker_task_definition.add_container(
@@ -157,7 +157,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
             "SafeTransactionServiceSchedule",
             cpu=512,
             memory_limit_mib=1024,
-            family="SafeTransactionService",
+            family="GnosisSafeServices",
         )
 
         schedule_task_definition.add_container(

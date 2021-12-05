@@ -33,6 +33,11 @@ class GnosisSafeSharedStack(cdk.Stack):
     def client_gateway_alb(self):
         return self._client_gateway_alb
 
+    @property
+    def ui_alb(self):
+        return self._ui_alb
+
+
     def __init__(
         self,
         scope: cdk.Construct,
@@ -59,6 +64,10 @@ class GnosisSafeSharedStack(cdk.Stack):
                         "CGW_ROCKET_SECRET_KEY": "",
                         "CGW_WEBHOOK_TOKEN": "",
                         "CGW_EXCHANGE_API_KEY": "",
+                        "UI_REACT_APP_INFURA_TOKEN": "",
+                        "UI_REACT_APP_ETHERSCAN_API_KEY": "",
+                        "UI_REACT_APP_ETHGASSTATION_API_KEY": "",
+                        "UI_REACT_APP_SAFE_APPS_RPC_INFURA_TOKEN": "",
                     }
                 ),
                 generate_string_key="password",  # Needed just to we can provision secrets manager with a template. Not used.
@@ -68,14 +77,22 @@ class GnosisSafeSharedStack(cdk.Stack):
         self._config_alb = elbv2.ApplicationLoadBalancer(
             self, "CfgGnosis", vpc=vpc, internet_facing=True
         )
+        cdk.Tags.of(self._config_alb).add("Name", "Gnosis Config")
 
         self._transaction_alb = elbv2.ApplicationLoadBalancer(
             self, "TxGnosis", vpc=vpc, internet_facing=True
         )
+        cdk.Tags.of(self._transaction_alb).add("Name", "Gnosis Transaction")
 
         self._client_gateway_alb = elbv2.ApplicationLoadBalancer(
             self, "ClientGatewayGnosis", vpc=vpc, internet_facing=True
         )
+        cdk.Tags.of(self._client_gateway_alb).add("Name", "Gnosis Client Gateway")
+
+        self._ui_alb = elbv2.ApplicationLoadBalancer(
+            self, "UIGnosis", vpc=vpc, internet_facing=True
+        )
+        cdk.Tags.of(self._ui_alb).add("Name", "Gnosis UI")
 
         self._log_group = logs.LogGroup(
             self, "LogGroup", retention=logs.RetentionDays.ONE_MONTH

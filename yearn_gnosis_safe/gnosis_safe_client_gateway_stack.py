@@ -67,7 +67,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             "SafeCGWServiceWeb",
             cpu=512,
             memory_limit_mib=1024,
-            family="SafeConfigurationService",
+            family="GnosisSafeServices",
         )
 
         web_task_definition.add_container(

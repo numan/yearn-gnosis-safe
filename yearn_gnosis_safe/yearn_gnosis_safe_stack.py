@@ -1,14 +1,15 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import core as cdk
+
 from yearn_gnosis_safe.gnosis_safe_client_gateway_stack import (
     GnosisSafeClientGatewayStack,
 )
 from yearn_gnosis_safe.gnosis_safe_configuration_stack import (
     GnosisSafeConfigurationStack,
 )
-
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.gnosis_safe_transaction_stack import GnosisSafeTransactionStack
+from yearn_gnosis_safe.gnosis_safe_ui_stack import GnosisSafeUIStack
 
 
 class YearnGnosisSafeStack(cdk.Stack):
@@ -16,6 +17,7 @@ class YearnGnosisSafeStack(cdk.Stack):
         self,
         scope: cdk.Construct,
         construct_id: str,
+        environment_name: str,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -36,6 +38,14 @@ class YearnGnosisSafeStack(cdk.Stack):
             **kwargs,
         )
 
+        client_gateway_stack = GnosisSafeClientGatewayStack(
+            self,
+            "GnosisCGW",
+            vpc=vpc,
+            shared_stack=shared_stack,
+            **kwargs,
+        )
+
         configuration_stack = GnosisSafeConfigurationStack(
             self,
             "GnosisCfg",
@@ -44,10 +54,11 @@ class YearnGnosisSafeStack(cdk.Stack):
             **kwargs,
         )
 
-        client_gateway_stack = GnosisSafeClientGatewayStack(
+        ui_stack = GnosisSafeUIStack(
             self,
-            "GnosisCGW",
+            "GnosisUI",
             vpc=vpc,
             shared_stack=shared_stack,
+            environment_name=environment_name,
             **kwargs,
         )

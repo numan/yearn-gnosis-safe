@@ -1,8 +1,12 @@
-from django.core.management.base import BaseCommand, CommandError
+import os
+
 from chains.models import Chain, GasPrice
+from django.core.management.base import BaseCommand
 from safe_apps.models import Provider, SafeApp
 
-TRANSACTION_SERVICE_URI = "https://safe-transaction.mainnet.gnosis.io"
+TRANSACTION_SERVICE_URI = os.environ.get(
+    "TRANSACTION_SERVICE_URI", "https://safe-transaction.mainnet.gnosis.io"
+)
 VPC_TRANSACTION_SERVICE_URI = (
     "http://mainnet-safe-transaction-web.safe.svc.cluster.local"
 )

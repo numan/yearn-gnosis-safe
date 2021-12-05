@@ -5,6 +5,7 @@ __pycache__
 .env
 .venv
 *.egg-info
+docker/ui/builds/build_*
 
 # CDK asset staging directory
 .cdk.staging
