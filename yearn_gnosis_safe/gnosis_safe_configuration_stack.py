@@ -1,7 +1,8 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
-from aws_cdk import core as cdk
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_rds as rds
+from aws_cdk import core as cdk
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 
@@ -20,6 +21,34 @@ class GnosisSafeConfigurationStack(cdk.Stack):
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        database_options = {
+            "engine": rds.DatabaseInstanceEngine.postgres(
+                version=rds.PostgresEngineVersion.VER_13_4
+            ),
+            "instance_type": ec2.InstanceType.of(
+                ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.SMALL
+            ),
+            "vpc": vpc,
+            "vpc_subnets": ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+            "max_allocated_storage": 500,
+            "credentials": rds.Credentials.from_generated_secret("postgres"),
+        }
+
+        database = rds.DatabaseInstance(
+            self,
+            "CfgDatabase",
+            engine=rds.DatabaseInstanceEngine.postgres(
+                version=rds.PostgresEngineVersion.VER_13_4
+            ),
+            instance_type=ec2.InstanceType.of(
+                ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.SMALL
+            ),
+            vpc=vpc,
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+            max_allocated_storage=500,
+            credentials=rds.Credentials.from_generated_secret("postgres"),
+        )
 
         ecs_cluster = ecs.Cluster(
             self,
@@ -43,7 +72,8 @@ class GnosisSafeConfigurationStack(cdk.Stack):
                 "GUNICORN_WEB_RELOAD": "false",
                 "DEFAULT_FILE_STORAGE": "django.core.files.storage.FileSystemStorage",
                 "CGW_URL": shared_stack.config_alb.load_balancer_dns_name,
-                "TRANSACTION_SERVICE_URI": f"http://{shared_stack.transaction_alb.load_balancer_dns_name}",
+                "TRANSACTION_SERVICE_MAINNET_URI": f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}",
+                "TRANSACTION_SERVICE_RINKEBY_URI": f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}",
             },
             "secrets": {
                 "SECRET_KEY": ecs.Secret.from_secrets_manager(
@@ -62,16 +92,16 @@ class GnosisSafeConfigurationStack(cdk.Stack):
                     shared_stack.secrets, "CGW_WEBHOOK_TOKEN"
                 ),
                 "POSTGRES_USER": ecs.Secret.from_secrets_manager(
-                    shared_stack.database.secret, "username"
+                    database.secret, "username"
                 ),
                 "POSTGRES_PASSWORD": ecs.Secret.from_secrets_manager(
-                    shared_stack.database.secret, "password"
+                    database.secret, "password"
                 ),
                 "POSTGRES_HOST": ecs.Secret.from_secrets_manager(
-                    shared_stack.database.secret, "host"
+                    database.secret, "host"
                 ),
                 "POSTGRES_PORT": ecs.Secret.from_secrets_manager(
-                    shared_stack.database.secret, "port"
+                    database.secret, "port"
                 ),
             },
         }
@@ -158,5 +188,5 @@ class GnosisSafeConfigurationStack(cdk.Stack):
 
         for service in [web_service]:
             service.connections.allow_to(
-                shared_stack.database, ec2.Port.tcp(5432), "RDS"
+                database, ec2.Port.tcp(5432), "RDS"
             )

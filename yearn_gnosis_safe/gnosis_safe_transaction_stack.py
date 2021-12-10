@@ -2,6 +2,8 @@ from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import core as cdk
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_rds as rds
+
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.redis_stack import RedisStack
@@ -18,9 +20,14 @@ class GnosisSafeTransactionStack(cdk.Stack):
         construct_id: str,
         vpc: ec2.IVpc,
         shared_stack: GnosisSafeSharedStack,
+        database: rds.DatabaseInstance,
+        alb: elbv2.ApplicationLoadBalancer,
+        chain_name: str,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        formatted_chain_name = chain_name.upper()
 
         self._redis_cluster = RedisStack(self, "RedisCluster", vpc=vpc)
 
@@ -45,16 +52,16 @@ class GnosisSafeTransactionStack(cdk.Stack):
             },
             "secrets": {
                 "DJANGO_SECRET_KEY": ecs.Secret.from_secrets_manager(
-                    shared_stack.secrets, "TX_DJANGO_SECRET_KEY"
+                    shared_stack.secrets, f"TX_DJANGO_SECRET_KEY_{formatted_chain_name}"
                 ),
                 "DATABASE_URL": ecs.Secret.from_secrets_manager(
-                    shared_stack.secrets, "TX_DATABASE_URL"
+                    shared_stack.secrets, f"TX_DATABASE_URL_{formatted_chain_name}"
                 ),
                 "ETHEREUM_NODE_URL": ecs.Secret.from_secrets_manager(
-                    shared_stack.secrets, "TX_ETHEREUM_NODE_URL"
+                    shared_stack.secrets, f"TX_ETHEREUM_NODE_URL_{formatted_chain_name}"
                 ),
                 "ETHEREUM_TRACING_NODE_URL": ecs.Secret.from_secrets_manager(
-                    shared_stack.secrets, "TX_ETHEREUM_TRACING_NODE_URL"
+                    shared_stack.secrets, f"TX_ETHEREUM_TRACING_NODE_URL_{formatted_chain_name}"
                 ),
             },
         }
@@ -183,7 +190,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
 
         ## Setup LB and redirect traffic to web and static containers
 
-        listener = shared_stack.transaction_alb.add_listener("Listener", port=80)
+        listener = alb.add_listener("Listener", port=80)
 
         listener.add_targets(
             "Static",
@@ -201,7 +208,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
 
         for service in [web_service, worker_service, schedule_service]:
             service.connections.allow_to(
-                shared_stack.database, ec2.Port.tcp(5432), "RDS"
+                database, ec2.Port.tcp(5432), "RDS"
             )
             service.connections.allow_to(
                 self.redis_cluster.connections, ec2.Port.tcp(6379), "Redis"

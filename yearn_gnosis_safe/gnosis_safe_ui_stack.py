@@ -31,7 +31,8 @@ class GnosisSafeUIStack(cdk.Stack):
                     allowed_headers=["*"],
                     allowed_origins=[
                         f"http://{shared_stack.client_gateway_alb.load_balancer_dns_name}",
-                        f"http://{shared_stack.transaction_alb.load_balancer_dns_name}",
+                        f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}",
+                        f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}",
                     ],
                 )
             ],

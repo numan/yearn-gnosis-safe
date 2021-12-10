@@ -4,10 +4,13 @@ from chains.models import Chain, GasPrice
 from django.core.management.base import BaseCommand
 from safe_apps.models import Provider, SafeApp
 
-TRANSACTION_SERVICE_URI = os.environ.get(
-    "TRANSACTION_SERVICE_URI", "https://safe-transaction.mainnet.gnosis.io"
+TRANSACTION_SERVICE_MAINNET_URI = os.environ.get(
+    "TRANSACTION_SERVICE_MAINNET_URI", "https://safe-transaction.mainnet.gnosis.io"
 )
-VPC_TRANSACTION_SERVICE_URI = (
+TRANSACTION_SERVICE_RINKEBY_URI = os.environ.get(
+    "TRANSACTION_SERVICE_RINKEBY_URI", "https://safe-transaction.mainnet.gnosis.io"
+)
+VPC_TRANSACTION_SERVICE_MAINNET_URI = (
     "http://mainnet-safe-transaction-web.safe.svc.cluster.local"
 )
 
@@ -538,8 +541,8 @@ class Command(BaseCommand):
             currency_symbol="ETH",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/1/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#001428",
             theme_background_color="#E8E7E6",
             ens_registry_address="0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
@@ -563,8 +566,8 @@ class Command(BaseCommand):
             currency_symbol="XDAI",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/100/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#48A9A6",
             ens_registry_address=None,
@@ -588,8 +591,8 @@ class Command(BaseCommand):
             currency_symbol="MATIC",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/137/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#8B50ED",
             ens_registry_address=None,
@@ -613,8 +616,8 @@ class Command(BaseCommand):
             currency_symbol="BNB",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/56/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#fcc323",
             ens_registry_address=None,
@@ -638,8 +641,8 @@ class Command(BaseCommand):
             currency_symbol="EWT",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/246/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#A566FF",
             ens_registry_address=None,
@@ -663,8 +666,8 @@ class Command(BaseCommand):
             currency_symbol="AETH",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/42161/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#f03c15",
             ens_registry_address=None,
@@ -688,8 +691,8 @@ class Command(BaseCommand):
             currency_symbol="ETH",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/4/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_RINKEBY_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#E8673C",
             ens_registry_address="0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
@@ -713,8 +716,8 @@ class Command(BaseCommand):
             currency_symbol="VT",
             currency_decimals=18,
             currency_logo_uri="https://safe-transaction-assets.gnosis-safe.io/chains/73799/currency_logo.png",
-            transaction_service_uri=TRANSACTION_SERVICE_URI,
-            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_URI,
+            transaction_service_uri=TRANSACTION_SERVICE_MAINNET_URI,
+            vpc_transaction_service_uri=VPC_TRANSACTION_SERVICE_MAINNET_URI,
             theme_text_color="#ffffff",
             theme_background_color="#514989",
             ens_registry_address=None,

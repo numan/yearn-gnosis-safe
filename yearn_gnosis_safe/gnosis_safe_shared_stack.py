@@ -10,8 +10,12 @@ from aws_cdk import core as cdk
 
 class GnosisSafeSharedStack(cdk.Stack):
     @property
-    def database(self):
-        return self._database
+    def mainnet_database(self):
+        return self._mainnet_database
+
+    @property
+    def rinkeby_database(self):
+        return self._rinkeby_database
 
     @property
     def log_group(self):
@@ -26,8 +30,12 @@ class GnosisSafeSharedStack(cdk.Stack):
         return self._config_alb
 
     @property
-    def transaction_alb(self):
-        return self._transaction_alb
+    def transaction_mainnet_alb(self):
+        return self._transaction_mainnet_alb
+
+    @property
+    def transaction_rinkeby_alb(self):
+        return self._transaction_rinkeby_alb
 
     @property
     def client_gateway_alb(self):
@@ -52,17 +60,26 @@ class GnosisSafeSharedStack(cdk.Stack):
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template=json.dumps(
                     {
+                        # Mainnet
                         "TX_DJANGO_SECRET_KEY": "",
                         "TX_DATABASE_URL": "",
                         "TX_ETHEREUM_NODE_URL": "",
                         "TX_ETHEREUM_TRACING_NODE_URL": "",
+                        # Rinkeby
+                        "TX_DJANGO_SECRET_KEY": "",
+                        "TX_DATABASE_URL": "",
+                        "TX_ETHEREUM_NODE_URL": "",
+                        "TX_ETHEREUM_TRACING_NODE_URL": "",
+                        # Configuration Service
                         "CFG_SECRET_KEY": "",
                         "CFG_DJANGO_SUPERUSER_USERNAME": "",
                         "CFG_DJANGO_SUPERUSER_PASSWORD": "",
                         "CFG_DJANGO_SUPERUSER_EMAIL": "",
+                        # Client Gateway
                         "CGW_ROCKET_SECRET_KEY": "",
                         "CGW_WEBHOOK_TOKEN": "",
                         "CGW_EXCHANGE_API_KEY": "",
+                        # UI
                         "UI_REACT_APP_INFURA_TOKEN": "",
                         "UI_REACT_APP_ETHERSCAN_API_KEY": "",
                         "UI_REACT_APP_ETHGASSTATION_API_KEY": "",
@@ -78,36 +95,56 @@ class GnosisSafeSharedStack(cdk.Stack):
         )
         cdk.Tags.of(self._config_alb).add("Name", "Gnosis Config")
 
-        self._transaction_alb = elbv2.ApplicationLoadBalancer(
-            self, "TxGnosis", vpc=vpc, internet_facing=True
+        self._transaction_mainnet_alb = elbv2.ApplicationLoadBalancer(
+            self, "TxGnosisMainnet", vpc=vpc, internet_facing=True
         )
-        cdk.Tags.of(self._transaction_alb).add("Name", "Gnosis Transaction")
+        cdk.Tags.of(self._transaction_mainnet_alb).add(
+            "Name", "Gnosis Transaction Mainnet"
+        )
+
+        self._transaction_rinkeby_alb = elbv2.ApplicationLoadBalancer(
+            self, "TxGnosisRinkeby", vpc=vpc, internet_facing=True
+        )
+        cdk.Tags.of(self._transaction_rinkeby_alb).add(
+            "Name", "Gnosis Transaction Rinkeby"
+        )
 
         self._client_gateway_alb = elbv2.ApplicationLoadBalancer(
             self, "ClientGatewayGnosis", vpc=vpc, internet_facing=True
         )
         cdk.Tags.of(self._client_gateway_alb).add("Name", "Gnosis Client Gateway")
 
-        self._erigon_nlb = elbv2.ApplicationLoadBalancer(
-            self, "ErigonALB", vpc=vpc
-        )
+        self._erigon_nlb = elbv2.ApplicationLoadBalancer(self, "ErigonALB", vpc=vpc)
         cdk.Tags.of(self._erigon_nlb).add("Name", "Erigon")
 
         self._log_group = logs.LogGroup(
             self, "LogGroup", retention=logs.RetentionDays.ONE_MONTH
         )
 
-        self._database = rds.DatabaseInstance(
-            self,
-            "PostgresDB",
-            engine=rds.DatabaseInstanceEngine.postgres(
+        # The databases for the transaction service need to be defined here because we need the database credentials
+        # as a database URL. This can't be done dynamically because of limitations of CDK/Cloud Formation.
+
+        database_options = {
+            "engine": rds.DatabaseInstanceEngine.postgres(
                 version=rds.PostgresEngineVersion.VER_13_4
             ),
-            instance_type=ec2.InstanceType.of(
+            "instance_type": ec2.InstanceType.of(
                 ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.SMALL
             ),
-            vpc=vpc,
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
-            max_allocated_storage=500,
-            credentials=rds.Credentials.from_generated_secret("postgres"),
+            "vpc": vpc,
+            "vpc_subnets": ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+            "max_allocated_storage": 500,
+            "credentials": rds.Credentials.from_generated_secret("postgres"),
+        }
+
+        self._mainnet_database = rds.DatabaseInstance(
+            self,
+            "MainnetTxDatabase",
+            **database_options,
+        )
+
+        self._rinkeby_database = rds.DatabaseInstance(
+            self,
+            "RinkebyTxDatabase",
+            **database_options,
         )

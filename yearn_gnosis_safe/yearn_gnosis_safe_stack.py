@@ -1,15 +1,15 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import core as cdk
 
-from yearn_gnosis_safe.gnosis_safe_client_gateway_stack import (
-    GnosisSafeClientGatewayStack,
-)
-from yearn_gnosis_safe.gnosis_safe_configuration_stack import (
-    GnosisSafeConfigurationStack,
-)
+from yearn_gnosis_safe.gnosis_safe_client_gateway_stack import \
+    GnosisSafeClientGatewayStack
+from yearn_gnosis_safe.gnosis_safe_configuration_stack import \
+    GnosisSafeConfigurationStack
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
-from yearn_gnosis_safe.gnosis_safe_transaction_stack import GnosisSafeTransactionStack
+from yearn_gnosis_safe.gnosis_safe_transaction_stack import \
+    GnosisSafeTransactionStack
 from yearn_gnosis_safe.gnosis_safe_ui_stack import GnosisSafeUIStack
+
 
 class YearnGnosisSafeStack(cdk.Stack):
     def __init__(
@@ -29,11 +29,25 @@ class YearnGnosisSafeStack(cdk.Stack):
 
         shared_stack = GnosisSafeSharedStack(self, "GnosisShared", vpc=vpc, **kwargs)
 
-        transaction_stack = GnosisSafeTransactionStack(
+        transaction_stack_mainnet = GnosisSafeTransactionStack(
             self,
-            "GnosisTx",
+            "GnosisTxMainnet",
             vpc=vpc,
             shared_stack=shared_stack,
+            chain_name="mainnet",
+            database=shared_stack.mainnet_database,
+            alb=shared_stack.transaction_mainnet_alb,
+            **kwargs,
+        )
+
+        transaction_stack_rinkeby = GnosisSafeTransactionStack(
+            self,
+            "GnosisTxRinkeby",
+            vpc=vpc,
+            shared_stack=shared_stack,
+            chain_name="rinkeby",
+            database=shared_stack.rinkeby_database,
+            alb=shared_stack.transaction_rinkeby_alb,
             **kwargs,
         )
 
@@ -56,7 +70,8 @@ class YearnGnosisSafeStack(cdk.Stack):
         configuration_stack.node.add_dependency(client_gateway_stack)
         configuration_stack.node.add_dependency(shared_stack)
 
-        transaction_stack.node.add_dependency(shared_stack)
+        transaction_stack_mainnet.node.add_dependency(shared_stack)
+        transaction_stack_rinkeby.node.add_dependency(shared_stack)
         client_gateway_stack.node.add_dependency(shared_stack)
 
         GnosisSafeUIStack(
