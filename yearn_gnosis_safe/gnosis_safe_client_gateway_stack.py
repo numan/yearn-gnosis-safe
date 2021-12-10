@@ -1,7 +1,7 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import core as cdk
-from yearn_gnosis_safe.gnosis_safe_configuration_stack import GnosisSafeConfigurationStack
+from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.redis_stack import RedisStack
@@ -34,7 +34,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
         container_args = {
             "image": ecs.ContainerImage.from_asset("docker/client-gateway"),
             "environment": {
-                "CONFIG_SERVICE_URI": shared_stack.config_alb.load_balancer_dns_name,
+                "CONFIG_SERVICE_URI": f"http://{shared_stack.config_alb.load_balancer_dns_name}",
                 "FEATURE_FLAG_NESTED_DECODING": "true",
                 "SCHEME": "http",
                 "ROCKET_LOG_LEVEL": "normal",
@@ -47,6 +47,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
                 "CHAIN_INFO_REQUEST_TIMEOUT": "15000",
                 "REDIS_URI": self.redis_connection_string,
                 "EXCHANGE_API_BASE_URI": "http://api.exchangeratesapi.io/latest",
+                "VPC_TRANSACTION_SERVICE_URI": 'false',
             },
             "secrets": {
                 "ROCKET_SECRET_KEY": ecs.Secret.from_secrets_manager(
@@ -88,10 +89,10 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             "WebService",
             cluster=ecs_cluster,
             task_definition=web_task_definition,
-            desired_count=1,
             circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
             assign_public_ip=True,
             enable_execute_command=True,
+            desired_count=1,
         )
 
         ## Setup LB and redirect traffic to web and static containers
@@ -102,6 +103,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             "WebTarget",
             port=80,
             targets=[service.load_balancer_target(container_name="web")],
+            health_check=elbv2.HealthCheck(path="/health")
         )
 
         for service in [service]:
@@ -109,5 +111,5 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
 
     @property
     def redis_connection_string(self) -> str:
-        return f"redis://{self.redis_cluster.cluster.attr_redis_endpoint_address}:{self.redis_cluster.cluster.attr_redis_endpoint_port}"
+        return f"redis://{self.redis_cluster.cluster.attr_primary_end_point_address}:{self.redis_cluster.cluster.attr_primary_end_point_port}"
 

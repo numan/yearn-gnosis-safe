@@ -11,7 +11,6 @@ from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.gnosis_safe_transaction_stack import GnosisSafeTransactionStack
 from yearn_gnosis_safe.gnosis_safe_ui_stack import GnosisSafeUIStack
 
-
 class YearnGnosisSafeStack(cdk.Stack):
     def __init__(
         self,
@@ -54,11 +53,16 @@ class YearnGnosisSafeStack(cdk.Stack):
             **kwargs,
         )
 
-        ui_stack = GnosisSafeUIStack(
+        configuration_stack.node.add_dependency(client_gateway_stack)
+        configuration_stack.node.add_dependency(shared_stack)
+
+        transaction_stack.node.add_dependency(shared_stack)
+        client_gateway_stack.node.add_dependency(shared_stack)
+
+        GnosisSafeUIStack(
             self,
             "GnosisUI",
-            vpc=vpc,
-            shared_stack=shared_stack,
             environment_name=environment_name,
+            shared_stack=shared_stack,
             **kwargs,
         )

@@ -34,9 +34,8 @@ class GnosisSafeSharedStack(cdk.Stack):
         return self._client_gateway_alb
 
     @property
-    def ui_alb(self):
-        return self._ui_alb
-
+    def erigon_nlb(self):
+        return self._erigon_nlb
 
     def __init__(
         self,
@@ -89,10 +88,10 @@ class GnosisSafeSharedStack(cdk.Stack):
         )
         cdk.Tags.of(self._client_gateway_alb).add("Name", "Gnosis Client Gateway")
 
-        self._ui_alb = elbv2.ApplicationLoadBalancer(
-            self, "UIGnosis", vpc=vpc, internet_facing=True
+        self._erigon_nlb = elbv2.ApplicationLoadBalancer(
+            self, "ErigonALB", vpc=vpc
         )
-        cdk.Tags.of(self._ui_alb).add("Name", "Gnosis UI")
+        cdk.Tags.of(self._erigon_nlb).add("Name", "Erigon")
 
         self._log_group = logs.LogGroup(
             self, "LogGroup", retention=logs.RetentionDays.ONE_MONTH
@@ -112,4 +111,3 @@ class GnosisSafeSharedStack(cdk.Stack):
             max_allocated_storage=500,
             credentials=rds.Credentials.from_generated_secret("postgres"),
         )
-

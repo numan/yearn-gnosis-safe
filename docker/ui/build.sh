@@ -48,11 +48,11 @@ while read -r LB_ARN DNS_NAME; do
     IS_CGW_LB=$(aws elbv2 describe-tags --resource-arns ${LB_ARN} --query "TagDescriptions[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']] && TagDescriptions[?Tags[?Key=='Name' && Value=='Gnosis Client Gateway']]" --output text)
     echo
     if [[ -n $IS_TX_LB ]]; then
-        REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI="http://${DNS_NAME}"
+        REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI="http://${DNS_NAME}/api/v1"
         printf "Setting Transaction URI ${ORANGE}${REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI}${NC}"
     fi
     if [[ -n $IS_CGW_LB ]]; then
-        REACT_APP_SAFE_CLIENT_GATEWAY_API_URI="http://$DNS_NAME"
+        REACT_APP_SAFE_CLIENT_GATEWAY_API_URI="http://${DNS_NAME}/v1"
         printf "Setting Client Gateway URI ${ORANGE}${REACT_APP_SAFE_CLIENT_GATEWAY_API_URI}${NC}"
     fi
 done <<< "$(aws elbv2 describe-load-balancers --query "LoadBalancers[].{ID:LoadBalancerArn,NAME:DNSName}" --output text)"

@@ -43,7 +43,7 @@ class GnosisSafeConfigurationStack(cdk.Stack):
                 "GUNICORN_WEB_RELOAD": "false",
                 "DEFAULT_FILE_STORAGE": "django.core.files.storage.FileSystemStorage",
                 "CGW_URL": shared_stack.config_alb.load_balancer_dns_name,
-                "TRANSACTION_SERVICE_URI": shared_stack.transaction_alb.load_balancer_dns_name,
+                "TRANSACTION_SERVICE_URI": f"http://{shared_stack.transaction_alb.load_balancer_dns_name}",
             },
             "secrets": {
                 "SECRET_KEY": ecs.Secret.from_secrets_manager(

@@ -1,12 +1,10 @@
 from aws_cdk import aws_ec2 as ec2
-from aws_cdk import aws_ecs as ecs
 from aws_cdk import core as cdk
-from yearn_gnosis_safe.gnosis_safe_configuration_stack import (
-    GnosisSafeConfigurationStack,
-)
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_s3_deployment as s3_deployment
+from aws_cdk.aws_cloudfront import AllowedMethods
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
-from yearn_gnosis_safe.redis_stack import RedisStack
 
 
 class GnosisSafeUIStack(cdk.Stack):
@@ -14,63 +12,39 @@ class GnosisSafeUIStack(cdk.Stack):
         self,
         scope: cdk.Construct,
         construct_id: str,
-        vpc: ec2.IVpc,
-        shared_stack: GnosisSafeSharedStack,
         environment_name: str,
+        shared_stack: GnosisSafeSharedStack,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        self._redis_cluster = RedisStack(self, "RedisCluster", vpc=vpc)
-
-        ecs_cluster = ecs.Cluster(
+        bucket = s3.Bucket(
             self,
-            "GnosisSafeCluster",
-            enable_fargate_capacity_providers=True,
-            vpc=vpc,
+            f"{environment_name.upper()}Bucket",
+            website_index_document="index.html",
+            public_read_access=True,
+            auto_delete_objects=True,
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            cors=[
+                s3.CorsRule(
+                    allowed_methods=[s3.HttpMethods.GET, s3.HttpMethods.POST],
+                    allowed_headers=["*"],
+                    allowed_origins=[
+                        f"http://{shared_stack.client_gateway_alb.load_balancer_dns_name}",
+                        f"http://{shared_stack.transaction_alb.load_balancer_dns_name}",
+                    ],
+                )
+            ],
         )
 
-        ## Web
-        web_task_definition = ecs.FargateTaskDefinition(
+        s3_deployment.BucketDeployment(
             self,
-            "SafeUIServiceWeb",
-            cpu=512,
-            memory_limit_mib=1024,
-            family="GnosisSafeServices",
-        )
-
-        web_task_definition.add_container(
-            "Web",
-            image=ecs.ContainerImage.from_asset(
-                "docker/ui", build_args={"ENVIRONMENT_NAME": environment_name}
-            ),
-            container_name="web",
-            working_directory="/app",
-            logging=ecs.AwsLogDriver(
-                log_group=shared_stack.log_group,
-                stream_prefix="Web",
-                mode=ecs.AwsLogDriverMode.NON_BLOCKING,
-            ),
-            port_mappings=[ecs.PortMapping(container_port=80)],
-        )
-
-        service = ecs.FargateService(
-            self,
-            "WebService",
-            cluster=ecs_cluster,
-            task_definition=web_task_definition,
-            desired_count=1,
-            circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
-            assign_public_ip=True,
-            enable_execute_command=True,
-        )
-
-        ## Setup LB and redirect traffic to web and static containers
-
-        listener = shared_stack.ui_alb.add_listener("Listener", port=80)
-
-        listener.add_targets(
-            "WebTarget",
-            port=80,
-            targets=[service.load_balancer_target(container_name="web")],
+            f"{environment_name.upper()}BucketDeployment",
+            sources=[
+                s3_deployment.Source.asset(
+                    f"docker/ui/builds/build_{environment_name.lower()}"
+                )
+            ],
+            destination_bucket=bucket,
+            retain_on_delete=False,
         )

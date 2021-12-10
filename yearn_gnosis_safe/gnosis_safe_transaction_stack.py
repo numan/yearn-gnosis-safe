@@ -209,4 +209,4 @@ class GnosisSafeTransactionStack(cdk.Stack):
 
     @property
     def redis_connection_string(self) -> str:
-        return f"redis://{self.redis_cluster.cluster.attr_redis_endpoint_address}:{self.redis_cluster.cluster.attr_redis_endpoint_port}"
+        return f"redis://{self.redis_cluster.cluster.attr_primary_end_point_address}:{self.redis_cluster.cluster.attr_primary_end_point_port}"
