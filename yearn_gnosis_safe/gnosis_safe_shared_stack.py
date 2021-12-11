@@ -41,10 +41,6 @@ class GnosisSafeSharedStack(cdk.Stack):
     def client_gateway_alb(self):
         return self._client_gateway_alb
 
-    @property
-    def erigon_nlb(self):
-        return self._erigon_nlb
-
     def __init__(
         self,
         scope: cdk.Construct,
@@ -61,15 +57,15 @@ class GnosisSafeSharedStack(cdk.Stack):
                 secret_string_template=json.dumps(
                     {
                         # Mainnet
-                        "TX_DJANGO_SECRET_KEY": "",
-                        "TX_DATABASE_URL": "",
-                        "TX_ETHEREUM_NODE_URL": "",
-                        "TX_ETHEREUM_TRACING_NODE_URL": "",
+                        "TX_DJANGO_SECRET_KEY_MAINNET": "",
+                        "TX_DATABASE_URL_MAINNET": "",
+                        "TX_ETHEREUM_NODE_URL_MAINNET": "",
+                        "TX_ETHEREUM_TRACING_NODE_URL_MAINNET": "",
                         # Rinkeby
-                        "TX_DJANGO_SECRET_KEY": "",
-                        "TX_DATABASE_URL": "",
-                        "TX_ETHEREUM_NODE_URL": "",
-                        "TX_ETHEREUM_TRACING_NODE_URL": "",
+                        "TX_DJANGO_SECRET_KEY_RINKEBY": "",
+                        "TX_DATABASE_URL_RINKEBY": "",
+                        "TX_ETHEREUM_NODE_URL_RINKEBY": "",
+                        "TX_ETHEREUM_TRACING_NODE_URL_RINKEBY": "",
                         # Configuration Service
                         "CFG_SECRET_KEY": "",
                         "CFG_DJANGO_SUPERUSER_USERNAME": "",
@@ -113,9 +109,6 @@ class GnosisSafeSharedStack(cdk.Stack):
             self, "ClientGatewayGnosis", vpc=vpc, internet_facing=True
         )
         cdk.Tags.of(self._client_gateway_alb).add("Name", "Gnosis Client Gateway")
-
-        self._erigon_nlb = elbv2.ApplicationLoadBalancer(self, "ErigonALB", vpc=vpc)
-        cdk.Tags.of(self._erigon_nlb).add("Name", "Erigon")
 
         self._log_group = logs.LogGroup(
             self, "LogGroup", retention=logs.RetentionDays.ONE_MONTH

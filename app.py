@@ -16,5 +16,6 @@ prod_stack = YearnGnosisSafeStack(
     app, "GnosisSafeStack", environment_name=environment_name, env=environment
 )
 cdk.Tags.of(prod_stack).add("environment", environment_name)
+cdk.Tags.of(prod_stack).add("app", "Gnosis Safe")
 
 app.synth()

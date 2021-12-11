@@ -39,7 +39,7 @@ const mainnet: NetworkConfig = {
     production: {
       ...baseConfig,
       clientGatewayUrl: process.env.REACT_APP_SAFE_CLIENT_GATEWAY_API_URI || 'https://safe-client.gnosis.io/v1',
-      txServiceUrl: process.env.REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI || 'https://safe-transaction.mainnet.gnosis.io/api/v1',
+      txServiceUrl: process.env.REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI || 'https://safe-transaction.mainnet.gnosis.io/api/v1',
     },
   },
   network: {

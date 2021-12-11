@@ -1,6 +1,6 @@
 import os
 
-from chains.models import Chain, GasPrice
+from chains.models import Chain, GasPrice, Feature
 from django.core.management.base import BaseCommand
 from safe_apps.models import Provider, SafeApp
 
@@ -24,10 +24,21 @@ class Command(BaseCommand):
         Provider.objects.all().delete()
         SafeApp.objects.all().delete()
 
+        self._bootstrap_features()
+
         if Chain.objects.count() == 0:
             self._bootstrap_chain()
         if SafeApp.objects.count() == 0:
             self._bootstrap_safe_apps()
+
+    def _bootstrap_features(self):
+        self._feature_contract_interaction, _ = Feature.objects.get_or_create(key="CONTRACT_INTERACTION")
+        self._feature_domain_lookup, _ = Feature.objects.get_or_create(key="DOMAIN_LOOKUP")
+        self._feature_eip1559, _ = Feature.objects.get_or_create(key="EIP1559")
+        self._feature_erc721, _ = Feature.objects.get_or_create(key="ERC721")
+        self._feature_safe_apps, _ = Feature.objects.get_or_create(key="SAFE_APPS")
+        self._feature_safe_tx_gas_optional, _ = Feature.objects.get_or_create(key="SAFE_TX_GAS_OPTIONAL")
+        self._feature_spending_limit, _ = Feature.objects.get_or_create(key="SPENDING_LIMIT")
 
     def _bootstrap_safe_apps(self):
         SafeApp.objects.create(
@@ -524,7 +535,7 @@ class Command(BaseCommand):
 
     def _bootstrap_chain(self):
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="Ethereum",
             id="1",
             description="The main Ethereum network",
@@ -548,8 +559,15 @@ class Command(BaseCommand):
             ens_registry_address="0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_domain_lookup.chains.add(chain)
+        self._feature_eip1559.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="xDai",
             id="100",
             description="",
@@ -573,8 +591,14 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_eip1559.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="Polygon Matic",
             id="137",
             description="L2 chain (MATIC)",
@@ -598,8 +622,12 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="Binance",
             id="56",
             description="",
@@ -623,8 +651,13 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="Energy Web",
             id="246",
             description="",
@@ -648,8 +681,15 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_domain_lookup.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
-        Chain.objects.create(
+
+        chain = Chain.objects.create(
             name="Arbitrum 1",
             id="42161",
             description="",
@@ -673,8 +713,13 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0+L2",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
 
-        Chain.objects.create(
+
+        chain = Chain.objects.create(
             name="Rinkeby",
             id="4",
             description="Ethereum testnet",
@@ -698,8 +743,15 @@ class Command(BaseCommand):
             ens_registry_address="0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_domain_lookup.chains.add(chain)
+        self._feature_eip1559.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
-        Chain.objects.create(
+        chain = Chain.objects.create(
             name="Volta",
             id="73799",
             description="",
@@ -723,6 +775,12 @@ class Command(BaseCommand):
             ens_registry_address=None,
             recommended_master_copy_version="1.3.0",
         )
+        self._feature_contract_interaction.chains.add(chain)
+        self._feature_domain_lookup.chains.add(chain)
+        self._feature_erc721.chains.add(chain)
+        self._feature_safe_apps.chains.add(chain)
+        self._feature_safe_tx_gas_optional.chains.add(chain)
+        self._feature_spending_limit.chains.add(chain)
 
         GasPrice.objects.create(
             chain_id=1,

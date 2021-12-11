@@ -40,16 +40,22 @@ export REACT_APP_ETHERSCAN_API_KEY=$(echo $SECRETS | jq -r .UI_REACT_APP_ETHERSC
 export REACT_APP_INFURA_TOKEN=$(echo $SECRETS | jq -r .UI_REACT_APP_INFURA_TOKEN | xargs)
 export REACT_APP_SAFE_APPS_RPC_INFURA_TOKEN=$(echo $SECRETS | jq -r .UI_REACT_APP_SAFE_APPS_RPC_INFURA_TOKEN | xargs)
 
-export REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI=
+export REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI=
+export REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI=
 export REACT_APP_SAFE_CLIENT_GATEWAY_API_URI=
 
 while read -r LB_ARN DNS_NAME; do
-    IS_TX_LB=$(aws elbv2 describe-tags --resource-arns ${LB_ARN} --query "TagDescriptions[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']] && TagDescriptions[?Tags[?Key=='Name' && Value=='Gnosis Transaction']]" --output text)
+    IS_TX_MAINNET_LB=$(aws elbv2 describe-tags --resource-arns ${LB_ARN} --query "TagDescriptions[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']] && TagDescriptions[?Tags[?Key=='Name' && Value=='Gnosis Transaction Mainnet']]" --output text)
+    IS_TX_RINKEBY_LB=$(aws elbv2 describe-tags --resource-arns ${LB_ARN} --query "TagDescriptions[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']] && TagDescriptions[?Tags[?Key=='Name' && Value=='Gnosis Transaction Rinkeby']]" --output text)
     IS_CGW_LB=$(aws elbv2 describe-tags --resource-arns ${LB_ARN} --query "TagDescriptions[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']] && TagDescriptions[?Tags[?Key=='Name' && Value=='Gnosis Client Gateway']]" --output text)
     echo
-    if [[ -n $IS_TX_LB ]]; then
-        REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI="http://${DNS_NAME}/api/v1"
-        printf "Setting Transaction URI ${ORANGE}${REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI}${NC}"
+    if [[ -n $IS_TX_MAINNET_LB ]]; then
+        REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI="http://${DNS_NAME}/api/v1"
+        printf "Setting MAINNET Transaction URI ${ORANGE}${REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI}${NC}"
+    fi
+    if [[ -n $IS_TX_RINKEBY_LB ]]; then
+        REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI="http://${DNS_NAME}/api/v1"
+        printf "Setting RINKEBY Transaction URI ${ORANGE}${REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI}${NC}"
     fi
     if [[ -n $IS_CGW_LB ]]; then
         REACT_APP_SAFE_CLIENT_GATEWAY_API_URI="http://${DNS_NAME}/v1"
@@ -58,8 +64,14 @@ while read -r LB_ARN DNS_NAME; do
 done <<< "$(aws elbv2 describe-load-balancers --query "LoadBalancers[].{ID:LoadBalancerArn,NAME:DNSName}" --output text)"
 
 
-if [[ -z REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI ]]; then
-    echo "REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI not found" 1>&2
+if [[ -z REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI ]]; then
+    echo "REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI not found" 1>&2
+    exit 1
+fi
+
+
+if [[ -z REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI ]]; then
+    echo "REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI not found" 1>&2
     exit 1
 fi
 

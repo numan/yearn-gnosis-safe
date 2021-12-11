@@ -34,7 +34,7 @@ const rinkeby: NetworkConfig = {
     production: {
       ...baseConfig,
       clientGatewayUrl: process.env.REACT_APP_SAFE_CLIENT_GATEWAY_API_URI || 'https://safe-client.gnosis.io/v1',
-      txServiceUrl: process.env.REACT_APP_SAFE_TRANSACTION_GATEWAY_API_URI || 'https://safe-transaction.rinkeby.gnosis.io/api/v1',
+      txServiceUrl: process.env.REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI || 'https://safe-transaction.rinkeby.gnosis.io/api/v1',
     },
   },
   network: {
