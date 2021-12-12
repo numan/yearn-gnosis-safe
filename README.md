@@ -12,6 +12,8 @@ These definitions can then be synthesized to AWS CloudFormation Templates which 
 
 ## Setting up your local environment
 
+Clone this repository.
+
 It is best practice to use an isolated environment when working with this project.
 To manually create a virtualenv virtual environment on MacOS and Linux:
 
