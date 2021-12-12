@@ -1,4 +1,19 @@
 
+* [Welcome to Yearn Gnosis Safe!](#welcome-to-yearn-gnosis-safe)
+   * [Setting up your local environment](#setting-up-your-local-environment)
+   * [Infrastructure](#infrastructure)
+   * [Deploying Gnosis Safe](#deploying-gnosis-safe)
+      * [Prerequisites](#prerequisites)
+      * [1. Create infrastructure for secrets and add secrets](#1-create-infrastructure-for-secrets-and-add-secrets)
+      * [2. Build production bundle of the Gnosis Safe UI](#2-build-production-bundle-of-the-gnosis-safe-ui)
+      * [3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)](#3-create-the-rest-of-the-gnosis-safe-infrastructure-client-gateway-transaction-service-ui-configuration-service)
+      * [4. Bootstrap transaction data for existing safes](#4-bootstrap-transaction-data-for-existing-safes)
+   * [Docker Containers](#docker-containers)
+      * [Client Gateway](#client-gateway)
+      * [Configuration Service](#configuration-service)
+      * [Transactions Service](#transactions-service)
+      * [Gnosis Safe UI](#gnosis-safe-ui)
+
 # Welcome to Yearn Gnosis Safe!
 
 This repository contains Infrastructure as Code (IaC) for a self-hosted version of
