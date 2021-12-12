@@ -44,6 +44,23 @@ At this point you can now synthesize the CloudFormation template for this code.
 $ cdk synth
 ```
 
+## Infrastructure
+
+The following diagram provides a high level overview of the infrastructure that this repository deploys:
+
+![Infrastructure Diagram](./rename/SelfHostedGnosisSafe.png)
+
+(Source)[https://drive.google.com/file/d/1gySv-RDkNYCQkVAr7eyniQx7Sl3N8j-7/view?usp=sharing]
+
+1. The production bundle is deployed to an S3 bucket. You should be able to find the URL of the frontend UI by looking at the `Bucket website endpoint` in the `Static website hosting` section of the bucket's properties.
+2. The frontend UI uses blockchain nodes to power some of the functionality. You can use a service such as Infura or Alchemy.
+3. The UI performs most of its functionality by communicating with the Client Gateway.
+4. The Client Gateway retrieves information about safes from the transaction service. There is a transaction service deployed for Mainnet and Rinkeby.
+5. The Client Gateway also relies on the configuration service to determine which nodes and services to use for each network.
+6. Secrets store stores credentials for all the different services.
+7. The transaction service monitors Ethereum nodes for new blocks and inspects transactions with the `trace` API to index new safe related events. 
+
+
 ## Deploying Gnosis Safe
 
 Deploying can be summarized in the following steps:
