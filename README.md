@@ -181,7 +181,7 @@ Once connected to the container, you can start the re-indexing process by using 
 $ nohup python manage.py reindex_master_copies_with_retry --address ADDRESS1 ADDRESS2 --from-block-number BLOCK_NUMBER --block-process-limit 250 &
 ```
 
-For example, to index a safe at `0xfeb4acf3df3cdea7399794d0869ef76a6efaff52` find the block the safe was created in on (Etherscan)[https://etherscan.io/tx/0x3e697d51231aea892d410743c15f3feebcdc8a3f2602f8830d02d7dd5f52cec0] and issue the following command:
+For example, to index a safe at `0xfeb4acf3df3cdea7399794d0869ef76a6efaff52` find the block the safe was created in on [Etherscan](https://etherscan.io/tx/0x3e697d51231aea892d410743c15f3feebcdc8a3f2602f8830d02d7dd5f52cec0) and issue the following command:
 
 ```bash
 $ nohup python manage.py reindex_master_copies_with_retry --address 0xfeb4acf3df3cdea7399794d0869ef76a6efaff52 --from-block-number 10701802 --block-process-limit 250 &
