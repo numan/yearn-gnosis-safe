@@ -86,10 +86,10 @@ To install a self hosted version of Gnosis Safe, you'll also need the following:
 
 1. An Ethereum *Mainnet* node with the [Openethereum trace api](https://openethereum.github.io/JSONRPC-trace-module)
 2. An Ethereum *Rinkeby* node with the [Openethereum trace api](https://openethereum.github.io/JSONRPC-trace-module)
-3. An (Infura API)[https://infura.io/] key
-4. An (Etherscan API)[https://etherscan.io/apis] key
-5. An (Eth Gas Station API)[https://docs.ethgasstation.info/#how-to-obtain-an-api-key] key
-6. An (Exchange Rate API)[https://exchangeratesapi.io/] key
+3. An [Infura API](https://infura.io/) key
+4. An [Etherscan API](https://etherscan.io/apis) key
+5. An [Eth Gas Station API](https://docs.ethgasstation.info/#how-to-obtain-an-api-key) key
+6. An [Exchange Rate API](https://exchangeratesapi.io/) key
 
 ### 1. Create infrastructure for secrets and add secrets
 
