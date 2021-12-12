@@ -1,1 +1,1 @@
-FROM gnosispm/safe-client-gateway:v3.10.0
+FROM gnosispm/safe-client-gateway:v3.11.0
