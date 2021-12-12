@@ -135,7 +135,7 @@ Fill out the following credentials in the Shared Secrets vault:
 
   ### 2. Build production bundle of the Gnosis Safe UI
 
-The (Gnosis Safe UI)[https://github.com/gnosis/safe-react] is part of this GitHub repo as a submodule in the `docker/ui/safe-react` folder. Ensure that the submodule has been initialized:
+The [Gnosis Safe UI](https://github.com/gnosis/safe-react) is part of this GitHub repo as a submodule in the `docker/ui/safe-react` folder. Ensure that the submodule has been initialized:
 
 ```bash
 $ git submodule update --init --recursive
