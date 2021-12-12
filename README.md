@@ -102,8 +102,11 @@ $ CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy Gno
 The deployment should create a shared secrets vault for all your secrets as well 2 secrets vaults for Postgres database credentials: one for the *Rinkeby Transaction Service* and one for the *Mainnet Transaction Service*.
 
 > You can distinguish the different vaults by inspecting their tags. The Shared Secrets vault will have a `aws:cloudformation:logical-id` that starts with `GnosisSharedSecrets`
+
 > Mainnet Postgres database credentials secrets vault will have a `aws:cloudformation:logical-id` that starts with `GnosisSafeStackGnosisSharedMainnetTxDatabaseSecret`
+
 > Rinkeby Postgres database credentials secrets vault will have a `aws:cloudformation:logical-id` that starts with `GnosisSafeStackGnosisSharedRinkebyTxDatabaseSecret`
+
 
 Fill out the following credentials in the Shared Secrets vault:
 
