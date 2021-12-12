@@ -48,9 +48,9 @@ $ cdk synth
 
 The following diagram provides a high level overview of the infrastructure that this repository deploys:
 
-![Infrastructure Diagram](./rename/SelfHostedGnosisSafe.png)
+![Infrastructure Diagram](./assets/SelfHostedGnosisSafe.png)
 
-(Source)[https://drive.google.com/file/d/1gySv-RDkNYCQkVAr7eyniQx7Sl3N8j-7/view?usp=sharing]
+[Source](https://drive.google.com/file/d/1gySv-RDkNYCQkVAr7eyniQx7Sl3N8j-7/view?usp=sharing)
 
 1. The production bundle is deployed to an S3 bucket. You should be able to find the URL of the frontend UI by looking at the `Bucket website endpoint` in the `Static website hosting` section of the bucket's properties.
 2. The frontend UI uses blockchain nodes to power some of the functionality. You can use a service such as Infura or Alchemy.
