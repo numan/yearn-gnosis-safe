@@ -29,7 +29,7 @@ class YearnGnosisSafeStack(cdk.Stack):
 
         shared_stack = GnosisSafeSharedStack(self, "GnosisShared", vpc=vpc, **kwargs)
 
-        transaction_stack_mainnet = GnosisSafeTransactionStack(
+        transaction_mainnet_stack = GnosisSafeTransactionStack(
             self,
             "GnosisTxMainnet",
             vpc=vpc,
@@ -40,7 +40,7 @@ class YearnGnosisSafeStack(cdk.Stack):
             **kwargs,
         )
 
-        transaction_stack_rinkeby = GnosisSafeTransactionStack(
+        transaction_rinkeby_stack = GnosisSafeTransactionStack(
             self,
             "GnosisTxRinkeby",
             vpc=vpc,
@@ -70,8 +70,8 @@ class YearnGnosisSafeStack(cdk.Stack):
         configuration_stack.node.add_dependency(client_gateway_stack)
         configuration_stack.node.add_dependency(shared_stack)
 
-        transaction_stack_mainnet.node.add_dependency(shared_stack)
-        transaction_stack_rinkeby.node.add_dependency(shared_stack)
+        transaction_mainnet_stack.node.add_dependency(shared_stack)
+        transaction_rinkeby_stack.node.add_dependency(shared_stack)
         client_gateway_stack.node.add_dependency(shared_stack)
 
         GnosisSafeUIStack(

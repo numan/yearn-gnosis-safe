@@ -90,7 +90,6 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             cluster=ecs_cluster,
             task_definition=web_task_definition,
             circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
-            assign_public_ip=True,
             enable_execute_command=True,
             desired_count=1,
         )

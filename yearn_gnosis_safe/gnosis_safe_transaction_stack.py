@@ -124,7 +124,6 @@ class GnosisSafeTransactionStack(cdk.Stack):
             task_definition=web_task_definition,
             desired_count=1,
             circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
-            assign_public_ip=True,
             enable_execute_command=True,
         )
 

@@ -14,7 +14,7 @@ class ErigonEthereumStack(cdk.Stack):
         scope: cdk.Construct,
         construct_id: str,
         vpc: ec2.Vpc,
-        shared_stack: GnosisSafeSharedStack,
+        # shared_stack: GnosisSafeSharedStack,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -23,10 +23,9 @@ class ErigonEthereumStack(cdk.Stack):
 
         asg = ecs_cluster.add_capacity(
             "ErigonInstance",
-            instance_type=ec2.InstanceType("i3en.3xlarge"),
-            associate_public_ip_address=True,
+            instance_type=ec2.InstanceType("i3.xlarge"),
             desired_capacity=1,
-            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
+            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
             key_name="ethereum-node",
         )
 
@@ -40,8 +39,8 @@ class ErigonEthereumStack(cdk.Stack):
         user_data.add_commands(
             *[
                 "sudo mkdir /mnt/nvm/",
-                "sudo mkfs -t ext4 /dev/nvme1n1",
-                "sudo mount -t ext4 /dev/nvme1n1 /mnt/nvm",
+                "sudo mkfs -t ext4 /dev/nvme0n1",
+                "sudo mount -t ext4 /dev/nvme0n1 /mnt/nvm",
                 "sudo mkdir -p /mnt/nvm/ethdata",
                 "sudo chown ec2-user:ec2-user /mnt/nvm/ethdata",
             ]
@@ -78,6 +77,8 @@ class ErigonEthereumStack(cdk.Stack):
                 "localhost:9090",
                 "--datadir",
                 "/data/ethdata",
+                "--chain",
+                "rinkeby",
             ],
             port_mappings=[
                 ecs.PortMapping(container_port=30303),  # listner / discovery
