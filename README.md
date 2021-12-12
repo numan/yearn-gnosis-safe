@@ -212,3 +212,35 @@ $ tail -f nohup.out
 > **NOTE:** If you want to index all safes, you'll want to upgrade the transaction service database, redis cache and increase the number of workers.
 
 > **NOTE:** The following steps can also be use on the Rinkeby transaction service.
+
+## Docker Containers
+
+This project uses the official [Gnosis Safe Docker Images](https://hub.docker.com/u/gnosispm) as a base and applies some modifications to support a self-hosted version.
+
+All customized Dockerfiles can be found in the `docker/` directory.
+
+### Client Gateway
+
+There are no modifications made to the original docker image.
+
+### Configuration Service
+
+Adds a new command to bootstrap the configuration service with configurations that replicate the configurations found on the official [Gnosis Safe Configuration Service](https://safe-config.gnosis.io/).
+
+The bootstrap command is designed to run only if there are no existing configurations.
+
+Also modifies the default container command run by the container to run the bootstrap command on initialization.
+
+### Transactions Service
+
+Installs a new CLI command `reindex_master_copies_with_retry` and a new Gnosis Safe indexer `retryable_index_service` that retries if a JSON RPC call fails during indexing. This was added to make indexing more reliable during initial bootstraping after a new install.
+
+## Gnosis Safe UI
+
+Contains a git submodule with the official [Gnosis Safe UI](https://github.com/gnosis/safe-react). It uses the official Gnosis Safe UI repository to build the production bundle.
+
+Before building a production file, some of the original configuration files are replaced. The current official ui hard codes the url for the configuration and transaction services. The configuration files are replaced to point to the newly deployed configuration and transaction services.
+
+Running `docker/ui/build.sh` will automatically replace the configuration files and build a production bundle.
+
+The UI is the only component that isn't hosted in a docker container. It is hosted as a static website on S3.
