@@ -235,7 +235,7 @@ Also modifies the default container command run by the container to run the boot
 
 Installs a new CLI command `reindex_master_copies_with_retry` and a new Gnosis Safe indexer `retryable_index_service` that retries if a JSON RPC call fails during indexing. This was added to make indexing more reliable during initial bootstraping after a new install.
 
-## Gnosis Safe UI
+### Gnosis Safe UI
 
 Contains a git submodule with the official [Gnosis Safe UI](https://github.com/gnosis/safe-react). It uses the official Gnosis Safe UI repository to build the production bundle.
 
