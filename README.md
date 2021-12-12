@@ -69,7 +69,7 @@ Deploying can be summarized in the following steps:
 
 1. Create infrastructure for secrets and add secrets
 2. Build production bundle of the Gnosis Safe UI
-3. Create the rest of Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
+3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
 4. Bootstrap transaction data for existing safes
 
 ### Prerequisites
@@ -149,7 +149,7 @@ $ ENVIRONMENT_NAME=production ./build.sh
 $ ../..
 ```
 
-### 3. Create the rest of Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
+### 3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
 
 Deploy the rest of the Gnosis Safe infrastructure:
 
