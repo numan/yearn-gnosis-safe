@@ -54,6 +54,7 @@ class ErigonEthereumStack(cdk.Stack):
         task_definition = ecs.Ec2TaskDefinition(
             self,
             "ErigonTaskDefinition",
+            network_mode=ecs.NetworkMode.BRIDGE,
             volumes=[
                 ecs.Volume(
                     name="ethdata", host=ecs.Host(source_path="/mnt/nvm/ethdata")
@@ -64,7 +65,7 @@ class ErigonEthereumStack(cdk.Stack):
         container = task_definition.add_container(
             "ErigonContainer",
             container_name="erigon",
-            image=ecs.ContainerImage.from_registry("thorax/erigon:stable"),
+            image=ecs.ContainerImage.from_asset("docker/erigon"),
             memory_reservation_mib=1024,
             logging=ecs.AwsLogDriver(
                 log_group=log_group,
@@ -74,17 +75,21 @@ class ErigonEthereumStack(cdk.Stack):
             command=[
                 "erigon",
                 "--private.api.addr",
-                "localhost:9090",
+                "0.0.0.0:9090",
                 "--datadir",
                 "/data/ethdata",
                 "--chain",
                 "rinkeby",
+                "--healthcheck",
             ],
             port_mappings=[
                 ecs.PortMapping(container_port=30303),  # listner / discovery
                 ecs.PortMapping(container_port=30303, protocol=ecs.Protocol.UDP),  # listner / discovery
                 ecs.PortMapping(container_port=9090),  # gRPC
             ],
+            health_check=ecs.HealthCheck(
+                command=[ "CMD-SHELL", "/usr/local/bin/grpc_health_probe -addr 127.0.0.1:9090 || exit 1" ]
+            ),
         )
 
         container.add_mount_points(
@@ -95,46 +100,40 @@ class ErigonEthereumStack(cdk.Stack):
             )
         )
 
-        # rpc_container = task_definition.add_container(
-        #     "ErigonRPCContainer",
-        #     container_name="erigonrpc",
-        #     image=ecs.ContainerImage.from_registry("thorax/erigon:stable"),
-        #     memory_reservation_mib=1024,
-        #     logging=ecs.AwsLogDriver(
-        #         log_group=log_group,
-        #         stream_prefix="ErigonRPC",
-        #         mode=ecs.AwsLogDriverMode.NON_BLOCKING,
-        #     ),
-        #     command=[
-        #         "rpcdaemon",
-        #         "--private.api.addr",
-        #         "localhost:9090",
-        #         "--datadir",
-        #         "/data/ethdata",
-        #         "--http.addr",
-        #         "0.0.0.0",
-        #         "--http.port",
-        #         "8545",
-        #         "--http.vhosts",
-        #         "*",
-        #         "--http.corsdomain",
-        #         "*",
-        #         "--http.api",
-        #         "eth,debug,net,trace,web3,erigon",
-        #         "--ws",
-        #     ],
-        #     port_mappings=[
-        #         ecs.PortMapping(container_port=8545),  # RPC
-        #     ],
-        # )
+        rpc_container = task_definition.add_container(
+            "ErigonRPCContainer",
+            container_name="erigonrpc",
+            image=ecs.ContainerImage.from_registry("thorax/erigon:latest"),
+            memory_reservation_mib=1024,
+            logging=ecs.AwsLogDriver(
+                log_group=log_group,
+                stream_prefix="ErigonRPC",
+                mode=ecs.AwsLogDriverMode.NON_BLOCKING,
+            ),
+            command=[
+                "rpcdaemon",
+                "--private.api.addr",
+                "erigon:9090",
+                "--http.addr",
+                "0.0.0.0",
+                "--http.port",
+                "8545",
+                "--http.vhosts",
+                "*",
+                "--http.corsdomain",
+                "*",
+                "--http.api",
+                "eth,debug,net,trace,web3,erigon",
+                "--ws",
+            ],
+            port_mappings=[
+                ecs.PortMapping(container_port=8545),  # RPC
+            ],
+        )
 
-        # rpc_container.add_mount_points(
-        #     ecs.MountPoint(
-        #         source_volume="ethdata",
-        #         container_path="/data/ethdata",
-        #         read_only=False,
-        #     )
-        # )
+        dependency = ecs.ContainerDependency(container=container, condition=ecs.ContainerDependencyCondition.HEALTHY)
+        rpc_container.add_container_dependencies(dependency)
+        rpc_container.add_link(container, "erigon")
 
         service = ecs.Ec2Service(
             self,
@@ -145,19 +144,23 @@ class ErigonEthereumStack(cdk.Stack):
             enable_execute_command=True,
         )
 
-        # listener = shared_stack.erigon_nlb.add_listener(
-        #     "ErigonListener", protocol=elbv2.ApplicationProtocol.HTTP
-        # )
+        alb = elbv2.ApplicationLoadBalancer(
+            self, "ErigonALB", vpc=vpc, internet_facing=True
+        )
 
-        # listener.add_targets(
-        #     "Static",
-        #     port=80,
-        #     targets=[
-        #         service.load_balancer_target(
-        #             container_name="erigonrpc", container_port=8545
-        #         )
-        #     ],
-        #     health_check=elbv2.HealthCheck(path="/api/", healthy_http_codes="405"),
-        # )
+        listener = alb.add_listener(
+            "ErigonListener", protocol=elbv2.ApplicationProtocol.HTTP, port=8545
+        )
+
+        listener.add_targets(
+            "RPC",
+            protocol=elbv2.ApplicationProtocol.HTTP,
+            targets=[
+                service.load_balancer_target(
+                    container_name="erigonrpc",
+                )
+            ],
+            health_check=elbv2.HealthCheck(path="/", healthy_http_codes="400"),
+        )
 
         # service.connections.allow_to(shared_stack.erigon_nlb, ec2.Port.all_tcp())
