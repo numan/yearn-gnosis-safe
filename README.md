@@ -7,7 +7,7 @@
       * [1. Create infrastructure for secrets and add secrets](#1-create-infrastructure-for-secrets-and-add-secrets)
       * [2. Build production bundle of the Gnosis Safe UI](#2-build-production-bundle-of-the-gnosis-safe-ui)
       * [3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)](#3-create-the-rest-of-the-gnosis-safe-infrastructure-client-gateway-transaction-service-ui-configuration-service)
-      * [4. Bootstrap transaction data for existing safes](#4-bootstrap-transaction-data-for-existing-safes)
+      * [4. Index transaction data for existing safes](#4-index-transaction-data-for-existing-safes)
    * [Docker Containers](#docker-containers)
       * [Client Gateway](#client-gateway)
       * [Configuration Service](#configuration-service)
@@ -85,7 +85,7 @@ Deploying can be summarized in the following steps:
 1. Create infrastructure for secrets and add secrets
 2. Build production bundle of the Gnosis Safe UI
 3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
-4. Bootstrap transaction data for existing safes
+4. Index transaction data for existing safes
 
 ### Prerequisites
 
@@ -172,61 +172,9 @@ Deploy the rest of the Gnosis Safe infrastructure:
 $ CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy --all --require-approval never
 ```
 
-### 4. Bootstrap transaction data for existing safes
+### 4. Index transaction data for existing safes
 
-You can't import existing safes until the transaction service has indexed historical safes. To initiate indexing, you have to connect to the transaction service web container.
-
-Find the **ECS Fargate** cluster and task id of the mainnet transaction service. The cluster name should start with **GnosisSafeStackGnosisTxMainnet**. Find the task within the cluster running the `web` container.
-
-To connect to the container, use the following AWS CLI command:
-
-```bash
-$ aws ecs execute-command  \
-    --region us-east-1 \
-    --cluster <CLUSTER NAME> \
-    --task <TASK ID> \
-    --container web \
-    --command "/bin/bash" \
-    --interactive
-```
-
-Once connected to the container, you can start the re-indexing process by using the following command:
-
-```bash
-$ nohup python manage.py reindex_master_copies_with_retry --address ADDRESS1 ADDRESS2 --from-block-number BLOCK_NUMBER --block-process-limit 250 &
-```
-
-For example, to index a safe at `0xfeb4acf3df3cdea7399794d0869ef76a6efaff52` find the block the safe was created in on [Etherscan](https://etherscan.io/tx/0x3e697d51231aea892d410743c15f3feebcdc8a3f2602f8830d02d7dd5f52cec0) and issue the following command:
-
-```bash
-$ nohup python manage.py reindex_master_copies_with_retry --address 0xfeb4acf3df3cdea7399794d0869ef76a6efaff52 --from-block-number 10701802 --block-process-limit 250 &
-```
-
-To index multiple safes, find the a block number before all the safes you're interested in were created and issue the following command:
-
-```bash
-$ nohup python manage.py reindex_master_copies_with_retry --address 0xfeb4acf3df3cdea7399794d0869ef76a6efaff52 0x3305b8bc94d29f08277ae525e9335c531db97372ada8f80a5cb553d46399d8c8 --from-block-number 10701000 --block-process-limit 250 &
-```
-
-To index ALL safes, use the following command:
-
-```bash
-$ nohup python manage.py reindex_master_copies_with_retry --from-block-number 7457550 --block-process-limit 250 &
-```
-
-`7457553` is the block Version 1.0.0 of the Gnosis Safe contract was deployed, so the above command indexes all Gnosis Safe contracts.
-
-This should start the re-indexing process. You can track the progress by following the output log:
-
-```bash
-$ tail -f nohup.out
-```
-
-> **NOTE:** The indexing process can take several hours to run. The less safes you include, the faster the indexing process will run.
-
-> **NOTE:** If you want to index all safes, you'll want to upgrade the transaction service database, redis cache and increase the number of workers.
-
-> **NOTE:** The following steps can also be use on the Rinkeby transaction service.
+Indexing happens automatically, however, it can take 12+ hours for indexing to catch up to the most recent transaction. Once indexing is complete, you should be able to add any existing safe. 
 
 ## Docker Containers
 
