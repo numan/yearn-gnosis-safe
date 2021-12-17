@@ -1,9 +1,9 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
-from aws_cdk import core as cdk
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_rds as rds
-
+from aws_cdk import core as cdk
+from jsii import Number
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.redis_stack import RedisStack
@@ -23,13 +23,17 @@ class GnosisSafeTransactionStack(cdk.Stack):
         database: rds.DatabaseInstance,
         alb: elbv2.ApplicationLoadBalancer,
         chain_name: str,
+        number_of_workers: Number = 2,
+        cache_node_type: str = "cache.t3.small",
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         formatted_chain_name = chain_name.upper()
 
-        self._redis_cluster = RedisStack(self, "RedisCluster", vpc=vpc)
+        self._redis_cluster = RedisStack(
+            self, "RedisCluster", vpc=vpc, cache_node_type=cache_node_type
+        )
 
         ecs_cluster = ecs.Cluster(
             self,
@@ -61,7 +65,8 @@ class GnosisSafeTransactionStack(cdk.Stack):
                     shared_stack.secrets, f"TX_ETHEREUM_NODE_URL_{formatted_chain_name}"
                 ),
                 "ETHEREUM_TRACING_NODE_URL": ecs.Secret.from_secrets_manager(
-                    shared_stack.secrets, f"TX_ETHEREUM_TRACING_NODE_URL_{formatted_chain_name}"
+                    shared_stack.secrets,
+                    f"TX_ETHEREUM_TRACING_NODE_URL_{formatted_chain_name}",
                 ),
             },
         }
@@ -153,7 +158,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
             "WorkerService",
             cluster=ecs_cluster,
             task_definition=worker_task_definition,
-            desired_count=2 if chain_name != "mainnet" else 8,
+            desired_count=number_of_workers,
             circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
         )
 
@@ -206,9 +211,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
         )
 
         for service in [web_service, worker_service, schedule_service]:
-            service.connections.allow_to(
-                database, ec2.Port.tcp(5432), "RDS"
-            )
+            service.connections.allow_to(database, ec2.Port.tcp(5432), "RDS")
             service.connections.allow_to(
                 self.redis_cluster.connections, ec2.Port.tcp(6379), "Redis"
             )

@@ -8,7 +8,7 @@ class RedisStack(cdk.Construct):
     def connections(self):
         return self._connections
 
-    def __init__(self, scope: cdk.Construct, id: str, vpc: ec2.IVpc) -> None:
+    def __init__(self, scope: cdk.Construct, id: str, vpc: ec2.IVpc, cache_node_type: str="cache.t3.small") -> None:
         super().__init__(scope, id)
 
         sg_elasticache = ec2.SecurityGroup(
@@ -54,7 +54,7 @@ class RedisStack(cdk.Construct):
         redis_with_replicas = elasticache.CfnReplicationGroup(
             self,
             "RedisCacheWithReplicas",
-            cache_node_type="cache.t3.small",
+            cache_node_type=cache_node_type,
             engine="redis",
             engine_version="5.0.5",
             snapshot_retention_limit=3,

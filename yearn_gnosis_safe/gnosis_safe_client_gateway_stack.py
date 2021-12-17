@@ -18,11 +18,14 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
         construct_id: str,
         vpc: ec2.IVpc,
         shared_stack: GnosisSafeSharedStack,
+        cache_node_type: str = "cache.t3.small",
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        self._redis_cluster = RedisStack(self, "RedisCluster", vpc=vpc)
+        self._redis_cluster = RedisStack(
+            self, "RedisCluster", vpc=vpc, cache_node_type=cache_node_type
+        )
 
         ecs_cluster = ecs.Cluster(
             self,
@@ -47,7 +50,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
                 "CHAIN_INFO_REQUEST_TIMEOUT": "15000",
                 "REDIS_URI": self.redis_connection_string,
                 "EXCHANGE_API_BASE_URI": "http://api.exchangeratesapi.io/latest",
-                "VPC_TRANSACTION_SERVICE_URI": 'false',
+                "VPC_TRANSACTION_SERVICE_URI": "false",
             },
             "secrets": {
                 "ROCKET_SECRET_KEY": ecs.Secret.from_secrets_manager(
@@ -102,13 +105,14 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             "WebTarget",
             port=80,
             targets=[service.load_balancer_target(container_name="web")],
-            health_check=elbv2.HealthCheck(path="/health")
+            health_check=elbv2.HealthCheck(path="/health"),
         )
 
         for service in [service]:
-            service.connections.allow_to(self.redis_cluster.connections, ec2.Port.tcp(6379), "Redis")
+            service.connections.allow_to(
+                self.redis_cluster.connections, ec2.Port.tcp(6379), "Redis"
+            )
 
     @property
     def redis_connection_string(self) -> str:
         return f"redis://{self.redis_cluster.cluster.attr_primary_end_point_address}:{self.redis_cluster.cluster.attr_primary_end_point_port}"
-
