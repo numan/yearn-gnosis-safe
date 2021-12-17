@@ -14,16 +14,20 @@ class ErigonEthereumStack(cdk.Stack):
         scope: cdk.Construct,
         construct_id: str,
         vpc: ec2.Vpc,
-        # shared_stack: GnosisSafeSharedStack,
+        chain_name: str = "rinkeby",
+        instance_type: ec2.InstanceType = ec2.InstanceType("i3.xlarge"),
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        if chain_name not in ["mainnet", "rinkeby"]:
+            raise ValueError("chain must be either 'mainnet' or 'rinkeby'")
 
         ecs_cluster = ecs.Cluster(self, "ErigonCluster", vpc=vpc)
 
         asg = ecs_cluster.add_capacity(
             "ErigonInstance",
-            instance_type=ec2.InstanceType("i3.xlarge"),
+            instance_type=instance_type,
             desired_capacity=1,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
             key_name="ethereum-node",
@@ -79,7 +83,7 @@ class ErigonEthereumStack(cdk.Stack):
                 "--datadir",
                 "/data/ethdata",
                 "--chain",
-                "rinkeby",
+                chain_name,
                 "--healthcheck",
             ],
             port_mappings=[
