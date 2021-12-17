@@ -36,9 +36,15 @@ class GnosisSafeUIStack(cdk.Stack):
                     ],
                 )
             ],
+            website_routing_rules=[
+                s3.RoutingRule(
+                    condition=s3.RoutingRuleCondition(http_error_code_returned_equals="404"),
+                    replace_key=s3.ReplaceKey.with_("index.html"),
+                )
+            ],
         )
 
-        s3_deployment.BucketDeployment(
+        bucket_deployment = s3_deployment.BucketDeployment(
             self,
             f"{environment_name.upper()}BucketDeployment",
             sources=[

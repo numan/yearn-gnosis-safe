@@ -84,11 +84,16 @@ class ErigonEthereumStack(cdk.Stack):
             ],
             port_mappings=[
                 ecs.PortMapping(container_port=30303),  # listner / discovery
-                ecs.PortMapping(container_port=30303, protocol=ecs.Protocol.UDP),  # listner / discovery
+                ecs.PortMapping(
+                    container_port=30303, protocol=ecs.Protocol.UDP
+                ),  # listner / discovery
                 ecs.PortMapping(container_port=9090),  # gRPC
             ],
             health_check=ecs.HealthCheck(
-                command=[ "CMD-SHELL", "/usr/local/bin/grpc_health_probe -addr 127.0.0.1:9090 || exit 1" ]
+                command=[
+                    "CMD-SHELL",
+                    "/usr/local/bin/grpc_health_probe -addr 127.0.0.1:9090 || exit 1",
+                ]
             ),
         )
 
@@ -124,14 +129,21 @@ class ErigonEthereumStack(cdk.Stack):
                 "*",
                 "--http.api",
                 "eth,debug,net,trace,web3,erigon",
-                "--ws",
+                "--verbosity",
+                "3",
+                "--trace.maxtraces",
+                "10000",
+                "--rpc.batch.concurrency",
+                "6",
             ],
             port_mappings=[
                 ecs.PortMapping(container_port=8545),  # RPC
             ],
         )
 
-        dependency = ecs.ContainerDependency(container=container, condition=ecs.ContainerDependencyCondition.HEALTHY)
+        dependency = ecs.ContainerDependency(
+            container=container, condition=ecs.ContainerDependencyCondition.HEALTHY
+        )
         rpc_container.add_container_dependencies(dependency)
         rpc_container.add_link(container, "erigon")
 
@@ -160,7 +172,12 @@ class ErigonEthereumStack(cdk.Stack):
                     container_name="erigonrpc",
                 )
             ],
-            health_check=elbv2.HealthCheck(path="/", healthy_http_codes="400"),
+            health_check=elbv2.HealthCheck(
+                path="/",
+                healthy_http_codes="400,200",
+                timeout=cdk.Duration.seconds(60),
+                interval=cdk.Duration.seconds(65),
+            ),
         )
 
         # service.connections.allow_to(shared_stack.erigon_nlb, ec2.Port.all_tcp())

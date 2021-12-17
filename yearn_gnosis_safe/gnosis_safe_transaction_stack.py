@@ -153,7 +153,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
             "WorkerService",
             cluster=ecs_cluster,
             task_definition=worker_task_definition,
-            desired_count=4,
+            desired_count=2 if chain_name != "mainnet" else 8,
             circuit_breaker=ecs.DeploymentCircuitBreaker(rollback=True),
         )
 
