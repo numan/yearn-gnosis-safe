@@ -21,6 +21,7 @@ class AppStack(cdk.Stack):
             "ErigonStack",
             vpc=ec2.Vpc.from_lookup(self, "VPC", vpc_id=vpc_id),
             chain_name="rinkeby",
+            instance_type=ec2.InstanceType("i3.xlarge"),
             **kwargs
         )
 
