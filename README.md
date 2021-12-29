@@ -213,3 +213,109 @@ Before building a production file, some of the original configuration files are 
 Running `docker/ui/build.sh` will automatically replace the configuration files and build a production bundle.
 
 The UI is the only component that isn't hosted in a docker container. It is hosted as a static website on S3.
+
+
+## Ethereum Node
+
+One of the requirements to successfully run the Gnosis Safe backend is access to an Ethereum node with the [Openethereum trace module](https://openethereum.github.io/JSONRPC-trace-module) enabled.
+
+You can use hosted nodes such as [QuickNode](https://www.quicknode.com/) or [Alchemy](https://www.alchemy.com/). Erigon provides an equivalent implementation of [Openethereum trace module](https://openethereum.github.io/JSONRPC-trace-module).
+
+The following sections will describe how deploy a self hosted Erigon node using AWS CDK.
+
+### Deploying an Erigon Node
+
+1. Clone/fork this repository
+2. Using `erigon_app.py` as a template, define the nodes you would like to run. As an example, to run a mainnet and rinkeby node, you might want want something like this:
+
+```python
+#!/usr/bin/env python3
+import os
+
+from aws_cdk import core as cdk
+from aws_cdk import aws_ec2 as ec2
+
+from yearn_gnosis_safe.erigon_stack import ErigonEthereumStack
+
+app = cdk.App()
+
+
+class AppStack(cdk.Stack):
+    def __init__(self, scope: cdk.Construct, id: str, **kwargs) -> None:
+        super().__init__(scope, id, **kwargs)
+
+        ## VPC passed in through environment variables
+        vpc_id = os.environ.get("CDK_DEPLOY_VPC")
+
+        # NOTE: Your Ethereum Nodes go here
+        ## Your Rinkeby Node
+        ErigonEthereumStack(
+            self,
+            "ErigonRinkebyStack",
+            vpc=ec2.Vpc.from_lookup(self, "VPC", vpc_id=vpc_id),
+            chain_name="rinkeby",
+            instance_type=ec2.InstanceType("i3.large"),
+            **kwargs
+        )
+
+        ## Your Mainnet Node
+        ErigonEthereumStack(
+            self,
+            "ErigonMainnetStack",
+            vpc=ec2.Vpc.from_lookup(self, "VPC", vpc_id=vpc_id),
+            chain_name="mainnet",
+            instance_type=ec2.InstanceType("i3.2xlarge"), # Note the bigger instance to accommodate more data for mainnet
+            **kwargs
+        )
+
+
+environment = cdk.Environment(
+    account=os.environ.get("CDK_DEPLOY_ACCOUNT", os.environ["CDK_DEFAULT_ACCOUNT"]),
+    region=os.environ.get("CDK_DEPLOY_REGION", os.environ["CDK_DEFAULT_REGION"]),
+)
+app_stack = AppStack(app, "ErigonApp", env=environment)
+cdk.Tags.of(app_stack).add("app", "Erigon Node")
+
+
+app.synth()
+
+```
+
+3. Deploy using AWS CDK: `CDK_DEPLOY_VPC="vpc-11111111" CDK_DEPLOY_ACCOUNT="11111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy --app "python erigon_app.py" --all --require-approval never`
+
+
+Once deployment has completed, it can take a while for your nodes to completely sync up:
+
+- For `Rinkeby` if can take up to 24h for the node to completely sync up
+- For `Mainnet` if can take 2-3 days for the node to completely sync up
+
+### Accessing your nodes
+
+To access your nodes, navigate the **[Load Balancer Page](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LoadBalancers:sort=loadBalancerName)** on the AWS console. Find the load balancer for the node you want to access (should be obvious based on the name of your stack).
+
+Grab the DNS name for your load balancer. This is the URL you'll use to access your nodes.
+
+Alternatively, you can query all your load balancers using the AWS CLI:
+
+`aws elbv2 describe-load-balancers --query "LoadBalancers[].{ID:LoadBalancerArn,NAME:DNSName}"`
+
+
+**NOTE:** The node will be accessible on port `8545`
+
+Your Node URL should look something like:
+
+`http://Erigo-Erigo-11111-11111111.us-east-1.elb.amazonaws.com:8545`
+
+### Checking sync status
+
+To check the status of your nodes syncing, you can use the JSON RPC API.
+
+```bash
+$ curl --data '{"method":"eth_syncing","params":[],"id":1,"jsonrpc":"2.0"}' -H "Content-Type: application/json" -X POST http://Erigo-Erigo-11111-11111111.us-east-1.elb.amazonaws.com:8545
+```
+
+Once the node has completely the syncing process, you should see something like:
+
+```
+{"jsonrpc":"2.0","id":1,"result":false}
+```
