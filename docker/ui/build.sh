@@ -16,6 +16,16 @@ if [[ -z "$ENVIRONMENT_NAME" ]]; then
     exit 1
 fi
 
+if [[ -z "$AWS_PROFILE" ]]; then
+    echo "Must provide AWS_PROFILE in environment" 1>&2
+    exit 1
+fi
+
+if [[ -z "$AWS_REGION" ]]; then
+    export AWS_REGION="us-east-1"
+fi
+
+
 SECRET_ID=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='environment' && Value=='${ENVIRONMENT_NAME}']]" --filters Key=name,Values=GnosisSharedSecrets --query "SecretList[0].ARN" --output text)
 
 SECRETS=$(aws secretsmanager get-secret-value --secret-id ${SECRET_ID} | jq --raw-output '.SecretString')

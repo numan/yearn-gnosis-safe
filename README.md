@@ -160,9 +160,15 @@ To build the production bundle of the Gnosis Safe UI, use the build script in th
 
 ```bash
 $ cd docker/ui
-$ ENVIRONMENT_NAME=production ./build.sh
+$ ENVIRONMENT_NAME=production AWS_PROFILE="default" ./build.sh
 $ ../..
 ```
+
+You must provide the following environment variables:
+
+* `ENVIRONMENT_NAME` - The [environment name](https://github.com/numan/yearn-gnosis-safe/blob/main/app.py#L14) that matches the environment name of the backend being deployed
+* `AWS_PROFILE` - The name of the `AWS_PROFILE` where you can access the backend infrastructure that was deployed in the previous step. This is used to gather information like urls for the client gateway and the transaction service.
+* `AWS_REGION` - The region where the backend region is deployed. Assumes `us-east-1` by default.
 
 ### 3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
 

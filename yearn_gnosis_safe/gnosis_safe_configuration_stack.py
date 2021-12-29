@@ -71,7 +71,7 @@ class GnosisSafeConfigurationStack(cdk.Stack):
                 "POSTGRES_NAME": "postgres",
                 "GUNICORN_WEB_RELOAD": "false",
                 "DEFAULT_FILE_STORAGE": "django.core.files.storage.FileSystemStorage",
-                "CGW_URL": shared_stack.config_alb.load_balancer_dns_name,
+                "CGW_URL": shared_stack.client_gateway_alb.load_balancer_dns_name,
                 "TRANSACTION_SERVICE_MAINNET_URI": f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}",
                 "TRANSACTION_SERVICE_RINKEBY_URI": f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}",
             },
