@@ -14,6 +14,7 @@ class GnosisSafeUIStack(cdk.Stack):
         construct_id: str,
         environment_name: str,
         shared_stack: GnosisSafeSharedStack,
+        subdomain_name = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -24,6 +25,7 @@ class GnosisSafeUIStack(cdk.Stack):
             website_index_document="index.html",
             public_read_access=True,
             auto_delete_objects=True,
+            bucket_name=subdomain_name,
             removal_policy=cdk.RemovalPolicy.DESTROY,
             cors=[
                 s3.CorsRule(

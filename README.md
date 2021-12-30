@@ -87,6 +87,13 @@ Deploying can be summarized in the following steps:
 3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
 4. Index transaction data for existing safes
 
+You can customize your deployment by specifying the following environment variables when running `cdk deploy`:
+
+1. `CDK_DEPLOY_ACCOUNT` - The Account ID of the AWS account you want to deploy to.
+2. `CDK_DEPLOY_REGION` - the AWS region you want to deploy to.
+3. `UI_SUBDOMAIN` (*optional*) - Deploys the UI to a S3 bucket with the value of this environment variable. This is required if you want a [custom subdomain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/RoutingToS3Bucket.html) for your UI.
+4. `INCLUDE_RINKEBY` (*optional*) - If this `true`, CDK will deploy the transaction service to support the Rinkeby network.
+
 ### Prerequisites
 
 Before you start you need to install **AWS CDK CLI** and bootstrap your AWS account:
@@ -111,7 +118,7 @@ To install a self hosted version of Gnosis Safe, you'll also need the following:
 Use the **AWS CDK CLI** to deploy the shared infrastructure including a Secrets Vault where all sensitive secrets will be stored:
 
 ```bash
-$ CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy GnosisSafeStack/GnosisShared --require-approval never
+$ UI_SUBDOMAIN="gnosis.yearn.finance" CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy GnosisSafeStack/GnosisShared --require-approval never
 ```
 
 > `CDK_DEPLOY_ACCOUNT` and `CDK_DEPLOY_REGION` define the account and region you're deploying the infrastructure to respectively
@@ -175,7 +182,7 @@ You must provide the following environment variables:
 Deploy the rest of the Gnosis Safe infrastructure:
 
 ```bash
-$ CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy --all --require-approval never
+$ UI_SUBDOMAIN="gnosis.yearn.finance" CDK_DEPLOY_ACCOUNT="111111111111" CDK_DEPLOY_REGION="us-east-1" cdk deploy --all --require-approval never
 ```
 
 ### 4. Index transaction data for existing safes

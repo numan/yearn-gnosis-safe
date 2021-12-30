@@ -1,3 +1,4 @@
+from typing import Union
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import core as cdk
 
@@ -17,6 +18,8 @@ class YearnGnosisSafeStack(cdk.Stack):
         scope: cdk.Construct,
         construct_id: str,
         environment_name: str,
+        ui_subdomain: Union[str, None],
+        include_rinkeby: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -37,21 +40,21 @@ class YearnGnosisSafeStack(cdk.Stack):
             chain_name="mainnet",
             database=shared_stack.mainnet_database,
             alb=shared_stack.transaction_mainnet_alb,
-            number_of_workers=6,
+            number_of_workers=1,
             **kwargs,
         )
-
-        # transaction_rinkeby_stack = GnosisSafeTransactionStack(
-        #     self,
-        #     "GnosisTxRinkeby",
-        #     vpc=vpc,
-        #     shared_stack=shared_stack,
-        #     chain_name="rinkeby",
-        #     database=shared_stack.rinkeby_database,
-        #     alb=shared_stack.transaction_rinkeby_alb,
-        #     number_of_workers=2,
-        #     **kwargs,
-        # )
+        if include_rinkeby:
+            transaction_rinkeby_stack = GnosisSafeTransactionStack(
+                self,
+                "GnosisTxRinkeby",
+                vpc=vpc,
+                shared_stack=shared_stack,
+                chain_name="rinkeby",
+                database=shared_stack.rinkeby_database,
+                alb=shared_stack.transaction_rinkeby_alb,
+                number_of_workers=2,
+                **kwargs,
+            )
 
         client_gateway_stack = GnosisSafeClientGatewayStack(
             self,
@@ -73,7 +76,8 @@ class YearnGnosisSafeStack(cdk.Stack):
         configuration_stack.node.add_dependency(shared_stack)
 
         transaction_mainnet_stack.node.add_dependency(shared_stack)
-        # transaction_rinkeby_stack.node.add_dependency(shared_stack)
+        if include_rinkeby:
+            transaction_rinkeby_stack.node.add_dependency(shared_stack)
         client_gateway_stack.node.add_dependency(shared_stack)
 
         GnosisSafeUIStack(
@@ -81,5 +85,6 @@ class YearnGnosisSafeStack(cdk.Stack):
             "GnosisUI",
             environment_name=environment_name,
             shared_stack=shared_stack,
+            subdomain_name=ui_subdomain,
             **kwargs,
         )

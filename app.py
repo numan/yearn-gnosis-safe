@@ -11,10 +11,19 @@ environment = cdk.Environment(
     region=os.environ.get("CDK_DEPLOY_REGION", os.environ["CDK_DEFAULT_REGION"]),
 )
 
+ui_subdomain = os.environ.get("UI_SUBDOMAIN", None)
+include_rinkeby = os.environ.get("INCLUDE_RINKEBY", "false").lower() == "true"
+
 environment_name = "production"
 prod_stack = YearnGnosisSafeStack(
-    app, "GnosisSafeStack", environment_name=environment_name, env=environment
+    app,
+    "GnosisSafeStack",
+    ui_subdomain=ui_subdomain,
+    include_rinkeby=include_rinkeby,
+    environment_name=environment_name,
+    env=environment,
 )
+
 cdk.Tags.of(prod_stack).add("environment", environment_name)
 cdk.Tags.of(prod_stack).add("app", "Gnosis Safe")
 
