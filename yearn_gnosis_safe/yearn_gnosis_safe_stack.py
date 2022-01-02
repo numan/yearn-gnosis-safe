@@ -40,7 +40,7 @@ class YearnGnosisSafeStack(cdk.Stack):
             chain_name="mainnet",
             database=shared_stack.mainnet_database,
             alb=shared_stack.transaction_mainnet_alb,
-            number_of_workers=1,
+            number_of_workers=2,
             **kwargs,
         )
         if include_rinkeby:
@@ -52,7 +52,7 @@ class YearnGnosisSafeStack(cdk.Stack):
                 chain_name="rinkeby",
                 database=shared_stack.rinkeby_database,
                 alb=shared_stack.transaction_rinkeby_alb,
-                number_of_workers=2,
+                number_of_workers=1,
                 **kwargs,
             )
 
