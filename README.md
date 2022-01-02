@@ -13,6 +13,11 @@
       * [Configuration Service](#configuration-service)
       * [Transactions Service](#transactions-service)
       * [Gnosis Safe UI](#gnosis-safe-ui)
+   * [Ethereum Node](#ethereum-node)
+      * [Deploying an Erigon Node](#deploying-an-erigon-node)
+      * [Accessing your nodes](#accessing-your-nodes)
+      * [Checking sync status](#checking-sync-status)
+   * [Other things to consider](#other-things-to-consider)
 
 # Welcome to Yearn Gnosis Safe!
 
@@ -325,4 +330,23 @@ Once the node has completely the syncing process, you should see something like:
 
 ```
 {"jsonrpc":"2.0","id":1,"result":false}
+```
+
+## Other things to consider
+
+If you're running your own [Erigon](https://github.com/ledgerwatch/erigon) node, you'll need to increase the number of transactions you're allowed to include in `trace_*` requests. You can do this by setting the `--trace.maxtraces` to a high value (like `10000`) when running `rpcdaemon`.
+
+Example:
+
+```bash
+$ rpcdaemon \
+   --private.api.addr 127.0.0.1:9090 \
+   --http.addr 0.0.0.0 \
+   --http.port 8545 \
+   --http.vhosts * \
+   --http.corsdomain * \
+   --http.api eth,debug,net,trace,web3,erigon \
+   --verbosity 3 \
+   --trace.maxtraces 10000 \
+   --rpc.batch.concurrency 6
 ```
