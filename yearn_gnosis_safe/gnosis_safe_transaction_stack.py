@@ -53,6 +53,8 @@ class GnosisSafeTransactionStack(cdk.Stack):
                 "REDIS_URL": f"{self.redis_connection_string}/0",
                 "CELERY_BROKER_URL": f"{self.redis_connection_string}/1",
                 "DJANGO_ALLOWED_HOSTS": "*",
+                "DB_MAX_CONNS": "15",
+                "ETH_INTERNAL_TXS_BLOCK_PROCESS_LIMIT": "5000",
             },
             "secrets": {
                 "DJANGO_SECRET_KEY": ecs.Secret.from_secrets_manager(
