@@ -301,6 +301,43 @@ Once deployment has completed, it can take a while for your nodes to completely 
 - For `Rinkeby` if can take up to 24h for the node to completely sync up
 - For `Mainnet` if can take 2-3 days for the node to completely sync up
 
+To check the status of Gnosis data syncing process, ssh into one of the web containers of the transaction service (Mainnet or Rinkeby) using the AWS CLI:
+
+```bash
+$ aws ecs execute-command  \
+    --region us-east-1 \
+    --cluster GnosisSafeStackGnosisTxMainnet00505B13-GnosisSafeCluster27D40EB3-1M1NOijeJ84w \
+    --task 3a485889cb324c4abf8ee63c111a112b \
+    --container web \
+    --command "/bin/bash" \
+    --interactive
+```
+
+Once in the container, execute the Django shell:
+
+```bash
+$ python manage.py shell
+```
+
+And run the following code in the Django shell:
+
+```bash
+>>> from safe_transaction_service.history import models
+>>> for m in models.SafeMasterCopy.objects.all():
+...     print(m)
+...
+Address=0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552 - Initial-block-number=12504268 - Tx-block-number=13596589
+Address=0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F - Initial-block-number=9084503 - Tx-block-number=13602831
+Address=0xAC6072986E985aaBE7804695EC2d8970Cf7541A2 - Initial-block-number=6569433 - Tx-block-number=13908746
+Address=0x8942595A2dC5181Df0465AF0D7be08c8f23C93af - Initial-block-number=6766257 - Tx-block-number=13908936
+Address=0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A - Initial-block-number=7457553 - Tx-block-number=13909008
+Address=0xaE32496491b53841efb51829d6f886387708F99B - Initial-block-number=8915728 - Tx-block-number=13909348
+Address=0x6851D6fDFAfD08c0295C392436245E5bc78B0185 - Initial-block-number=10329734 - Tx-block-number=13989493
+Address=0x3E5c63644E683549055b9Be8653de26E0B4CD36E - Initial-block-number=12504423 - Tx-block-number=13998286
+```
+
+Once all the `Tx-block-number`s are close to the latest block on the chain, the syncing process has completed. Overtime, the transaction service will continue to parse new blocks as it encounters them.
+
 ### Accessing your nodes
 
 To access your nodes, navigate the **[Load Balancer Page](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#LoadBalancers:sort=loadBalancerName)** on the AWS console. Find the load balancer for the node you want to access (should be obvious based on the name of your stack).
