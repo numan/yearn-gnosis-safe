@@ -116,9 +116,6 @@ export PUBLIC_URL="/"
 
 printf "${WRENCH} ${GREEN}Building UI${NC}\n"
 
-printf "${WRENCH} ${GREEN}Replace server configurations ${NC}\n"
-cp configs/* ./safe-react/src/config/networks/
-
 printf "${WRENCH} ${GREEN}Creating an optimized production build...${NC}\n"
 # TODO: Do a yarn install
 yarn --cwd safe-react build
