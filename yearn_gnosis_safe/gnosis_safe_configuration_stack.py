@@ -1,3 +1,4 @@
+from typing import Optional
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -18,22 +19,22 @@ class GnosisSafeConfigurationStack(cdk.Stack):
         construct_id: str,
         vpc: ec2.IVpc,
         shared_stack: GnosisSafeSharedStack,
+        ssl_certificate_arn: Optional[str] = None,
+        client_gateway_url: Optional[str] = None,
+        mainnet_transaction_gateway_url: Optional[str] = None,
+        rinkeby_transaction_gateway_url: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        database_options = {
-            "engine": rds.DatabaseInstanceEngine.postgres(
-                version=rds.PostgresEngineVersion.VER_13_4
-            ),
-            "instance_type": ec2.InstanceType.of(
-                ec2.InstanceClass.BURSTABLE4_GRAVITON, ec2.InstanceSize.SMALL
-            ),
-            "vpc": vpc,
-            "vpc_subnets": ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
-            "max_allocated_storage": 500,
-            "credentials": rds.Credentials.from_generated_secret("postgres"),
-        }
+        if client_gateway_url is None:
+            client_gateway_url = shared_stack.client_gateway_alb.load_balancer_dns_name
+
+        if mainnet_transaction_gateway_url is None:
+            mainnet_transaction_gateway_url = f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}"
+
+        if rinkeby_transaction_gateway_url is None:
+            rinkeby_transaction_gateway_url = f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}"
 
         database = rds.DatabaseInstance(
             self,
@@ -71,9 +72,9 @@ class GnosisSafeConfigurationStack(cdk.Stack):
                 "POSTGRES_NAME": "postgres",
                 "GUNICORN_WEB_RELOAD": "false",
                 "DEFAULT_FILE_STORAGE": "django.core.files.storage.FileSystemStorage",
-                "CGW_URL": shared_stack.client_gateway_alb.load_balancer_dns_name,
-                "TRANSACTION_SERVICE_MAINNET_URI": f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}",
-                "TRANSACTION_SERVICE_RINKEBY_URI": f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}",
+                "CGW_URL": client_gateway_url,
+                "TRANSACTION_SERVICE_MAINNET_URI": mainnet_transaction_gateway_url,
+                "TRANSACTION_SERVICE_RINKEBY_URI": rinkeby_transaction_gateway_url,
             },
             "secrets": {
                 "SECRET_KEY": ecs.Secret.from_secrets_manager(
@@ -182,6 +183,32 @@ class GnosisSafeConfigurationStack(cdk.Stack):
             port=80,
             targets=[web_service.load_balancer_target(container_name="web")],
         )
+
+        if ssl_certificate_arn is not None:
+
+            ssl_listener = shared_stack.config_alb.add_listener(
+                "SSLListener", port=443
+            )
+
+            ssl_listener.add_certificate_arns(
+                "SSL Listener",
+                arns=[ssl_certificate_arn],
+            )
+
+            ssl_listener.add_targets(
+                "Static",
+                port=80,
+                targets=[web_service.load_balancer_target(container_name="static")],
+                priority=1,
+                conditions=[elbv2.ListenerCondition.path_patterns(["/static/*"])],
+                health_check=elbv2.HealthCheck(path="/static/drf-yasg/style.css"),
+            )
+
+            ssl_listener.add_targets(
+                "WebTarget",
+                protocol=elbv2.ApplicationProtocol.HTTP,
+                targets=[web_service.load_balancer_target(container_name="web")],
+            )
 
         ## Permissions
 

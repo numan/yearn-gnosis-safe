@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import core as cdk
 
@@ -20,6 +20,11 @@ class YearnGnosisSafeStack(cdk.Stack):
         environment_name: str,
         ui_subdomain: Union[str, None],
         include_rinkeby: bool = False,
+        config_service_uri: Optional[str] = None,
+        client_gateway_url: Optional[str] = None,
+        mainnet_transaction_gateway_url: Optional[str] = None,
+        rinkeby_transaction_gateway_url: Optional[str] = None,
+        ssl_certificate_arn: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -40,7 +45,8 @@ class YearnGnosisSafeStack(cdk.Stack):
             chain_name="mainnet",
             database=shared_stack.mainnet_database,
             alb=shared_stack.transaction_mainnet_alb,
-            number_of_workers=3,
+            number_of_workers=4,
+            ssl_certificate_arn=ssl_certificate_arn,
             **kwargs,
         )
         if include_rinkeby:
@@ -61,6 +67,8 @@ class YearnGnosisSafeStack(cdk.Stack):
             "GnosisCGW",
             vpc=vpc,
             shared_stack=shared_stack,
+            ssl_certificate_arn=ssl_certificate_arn,
+            config_service_uri=config_service_uri,
             **kwargs,
         )
 
@@ -69,6 +77,10 @@ class YearnGnosisSafeStack(cdk.Stack):
             "GnosisCfg",
             vpc=vpc,
             shared_stack=shared_stack,
+            ssl_certificate_arn=ssl_certificate_arn,
+            client_gateway_url=client_gateway_url,
+            mainnet_transaction_gateway_url=mainnet_transaction_gateway_url,
+            rinkeby_transaction_gateway_url=rinkeby_transaction_gateway_url,
             **kwargs,
         )
 
@@ -86,5 +98,9 @@ class YearnGnosisSafeStack(cdk.Stack):
             environment_name=environment_name,
             shared_stack=shared_stack,
             subdomain_name=ui_subdomain,
+            allowed_origins=[
+                "https://safe-client.mainnet.gnosis.yearn.tools",
+                "https://safe-transaction.mainnet.gnosis.yearn.tools"
+            ],
             **kwargs,
         )

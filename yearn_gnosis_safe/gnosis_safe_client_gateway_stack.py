@@ -1,3 +1,4 @@
+from typing import Optional
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import core as cdk
@@ -19,9 +20,14 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
         vpc: ec2.IVpc,
         shared_stack: GnosisSafeSharedStack,
         cache_node_type: str = "cache.t3.small",
+        ssl_certificate_arn: Optional[str] = None,
+        config_service_uri: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        if config_service_uri is None:
+            config_service_uri = f"http://{shared_stack.config_alb.load_balancer_dns_name}"
 
         self._redis_cluster = RedisStack(
             self, "RedisCluster", vpc=vpc, cache_node_type=cache_node_type
@@ -37,7 +43,7 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
         container_args = {
             "image": ecs.ContainerImage.from_asset("docker/client-gateway"),
             "environment": {
-                "CONFIG_SERVICE_URI": f"http://{shared_stack.config_alb.load_balancer_dns_name}",
+                "CONFIG_SERVICE_URI": config_service_uri,
                 "FEATURE_FLAG_NESTED_DECODING": "true",
                 "SCHEME": "http",
                 "ROCKET_LOG_LEVEL": "normal",
@@ -107,6 +113,24 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
             targets=[service.load_balancer_target(container_name="web")],
             health_check=elbv2.HealthCheck(path="/health"),
         )
+
+        if ssl_certificate_arn is not None:
+
+            ssl_listener = shared_stack.client_gateway_alb.add_listener(
+                "SSLListener", port=443
+            )
+
+            ssl_listener.add_certificate_arns(
+                "SSL Listener",
+                arns=[ssl_certificate_arn],
+            )
+
+            ssl_listener.add_targets(
+                "WebTarget",
+                protocol=elbv2.ApplicationProtocol.HTTP,
+                targets=[service.load_balancer_target(container_name="web")],
+                health_check=elbv2.HealthCheck(path="/health"),
+            )
 
         for service in [service]:
             service.connections.allow_to(

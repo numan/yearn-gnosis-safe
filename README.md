@@ -98,6 +98,11 @@ You can customize your deployment by specifying the following environment variab
 2. `CDK_DEPLOY_REGION` - the AWS region you want to deploy to.
 3. `UI_SUBDOMAIN` (*optional*) - Deploys the UI to a S3 bucket with the value of this environment variable. This is required if you want a [custom subdomain](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/RoutingToS3Bucket.html) for your UI.
 4. `INCLUDE_RINKEBY` (*optional*) - If this `true`, CDK will deploy the transaction service to support the Rinkeby network.
+5. `CONFIG_SERVICE_URI` (*optional*) - Define this if you are setting up a custom sub-domain for the configuration service, eg `safe-config.yourdomain.xyz`. 
+6. `CLIENT_GATEWAY_URL` (*optional*) - Define this if you are setting up a custom sub-domain for the client gateway service, eg `client.yourdomain.xyz`. 
+7. `MAINNET_TRANSACTION_GATEWAY_URL` (*optional*) - Define this if you are setting up a custom sub-domain for the mainnet transaction service, eg `tx.mainnet.yourdomain.xyz`. 
+8. `RINKEBY_TRANSACTION_GATEWAY_URL` (*optional*) - Define this if you are setting up a custom sub-domain for the rinkeby transaction service, eg `tx.rinkeby.yourdomain.xyz`. 
+9. `SSL_CERTIFICATE_ARN`  (*optional*) - The ARN of the SSL certificate you want to use. You need to define this if you want to enable https for your services.
 
 ### Prerequisites
 
@@ -181,6 +186,9 @@ You must provide the following environment variables:
 * `ENVIRONMENT_NAME` - The [environment name](https://github.com/numan/yearn-gnosis-safe/blob/main/app.py#L14) that matches the environment name of the backend being deployed
 * `AWS_PROFILE` - The name of the `AWS_PROFILE` where you can access the backend infrastructure that was deployed in the previous step. This is used to gather information like urls for the client gateway and the transaction service.
 * `AWS_REGION` - The region where the backend region is deployed. Assumes `us-east-1` by default.
+* `CLIENT_GATEWAY_BASE_URI` (*optional*) - Define this if you have setup a custom sub-domain for your client gateway. Eg `safe-client.yourdomain.xyz`.
+* `TRANSACTION_GATEWAY_MAINNET_BASE_URI=` (*optional*) - Define this if you have setup a custom sub-domain for your mainnet transaction service. Eg `tx.mainnet.yourdomain.xyz`.
+* `TRANSACTION_GATEWAY_RINKEBY_BASE_URI=` (*optional*) - Define this if you have setup a custom sub-domain for your rinkeby transaction service. Eg. `tx.rinkeby.yourdomain.xyz`.
 
 ### 3. Create the rest of the Gnosis Safe infrastructure (Client Gateway, Transaction Service, UI, Configuration Service)
 

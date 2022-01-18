@@ -1,3 +1,4 @@
+from typing import Optional
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
@@ -25,6 +26,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
         chain_name: str,
         number_of_workers: Number = 2,
         cache_node_type: str = "cache.t3.small",
+        ssl_certificate_arn: Optional[str] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -211,6 +213,32 @@ class GnosisSafeTransactionStack(cdk.Stack):
             port=80,
             targets=[web_service.load_balancer_target(container_name="web")],
         )
+
+        if ssl_certificate_arn is not None:
+
+            ssl_listener = alb.add_listener(
+                "SSLListener", port=443
+            )
+
+            ssl_listener.add_certificate_arns(
+                "SSL Listener",
+                arns=[ssl_certificate_arn],
+            )
+
+            ssl_listener.add_targets(
+                "WebTarget",
+                protocol=elbv2.ApplicationProtocol.HTTP,
+                targets=[web_service.load_balancer_target(container_name="web")],
+            )
+
+            ssl_listener.add_targets(
+                "Static",
+                port=80,
+                targets=[web_service.load_balancer_target(container_name="static")],
+                priority=1,
+                conditions=[elbv2.ListenerCondition.path_patterns(["/static/*"])],
+                health_check=elbv2.HealthCheck(path="/static/drf-yasg/style.css"),
+            )
 
         for service in [web_service, worker_service, schedule_service]:
             service.connections.allow_to(database, ec2.Port.tcp(5432), "RDS")

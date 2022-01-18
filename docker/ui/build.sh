@@ -74,6 +74,28 @@ while read -r LB_ARN DNS_NAME; do
 done <<< "$(aws elbv2 describe-load-balancers --query "LoadBalancers[].{ID:LoadBalancerArn,NAME:DNSName}" --output text)"
 
 
+printf "\n"
+
+## Override
+if [[ -n "$TRANSACTION_GATEWAY_MAINNET_BASE_URI" ]]; then
+    printf "Setting MAINNET Transaction URI using ${RED}OVERRIDE ${ORANGE}${TRANSACTION_GATEWAY_MAINNET_BASE_URI}${NC}\n"
+    REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI="${TRANSACTION_GATEWAY_MAINNET_BASE_URI}/api/v1"
+fi
+
+
+if [[ -n "$TRANSACTION_GATEWAY_RINKEBY_BASE_URI" ]]; then
+    printf "Setting RINKEBY Transaction URI using ${RED}OVERRIDE ${ORANGE}${TRANSACTION_GATEWAY_RINKEBY_BASE_URI}${NC}\n"
+    REACT_APP_SAFE_TRANSACTION_GATEWAY_RINKEBY_API_URI="${TRANSACTION_GATEWAY_RINKEBY_BASE_URI}/api/v1"
+fi
+
+
+if [[ -n "$CLIENT_GATEWAY_BASE_URI" ]]; then
+    printf "Setting Client Gateway URI using ${RED}OVERRIDE ${ORANGE}${CLIENT_GATEWAY_BASE_URI}${NC}\n"
+    REACT_APP_SAFE_CLIENT_GATEWAY_API_URI="${CLIENT_GATEWAY_BASE_URI}/v1"
+fi
+
+printf "\n"
+
 if [[ -z REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI ]]; then
     echo "REACT_APP_SAFE_TRANSACTION_GATEWAY_MAINNET_API_URI not found" 1>&2
     exit 1

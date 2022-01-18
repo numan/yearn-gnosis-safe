@@ -1,8 +1,8 @@
+from typing import Optional, Sequence
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import core as cdk
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deployment
-from aws_cdk.aws_cloudfront import AllowedMethods
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 
@@ -15,9 +15,12 @@ class GnosisSafeUIStack(cdk.Stack):
         environment_name: str,
         shared_stack: GnosisSafeSharedStack,
         subdomain_name = None,
+        allowed_origins: Optional[Sequence[str]] = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        if allowed_origins is None:
+            allowed_origins = []
 
         bucket = s3.Bucket(
             self,
@@ -35,7 +38,7 @@ class GnosisSafeUIStack(cdk.Stack):
                         f"http://{shared_stack.client_gateway_alb.load_balancer_dns_name}",
                         f"http://{shared_stack.transaction_mainnet_alb.load_balancer_dns_name}",
                         f"http://{shared_stack.transaction_rinkeby_alb.load_balancer_dns_name}",
-                    ],
+                    ] + allowed_origins,
                 )
             ],
             website_routing_rules=[
