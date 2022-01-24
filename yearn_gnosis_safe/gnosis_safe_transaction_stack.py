@@ -72,6 +72,10 @@ class GnosisSafeTransactionStack(cdk.Stack):
                     shared_stack.secrets,
                     f"TX_ETHEREUM_TRACING_NODE_URL_{formatted_chain_name}",
                 ),
+                "ETHERSCAN_API_KEY": ecs.Secret.from_secrets_manager(
+                    shared_stack.secrets,
+                    f"TX_ETHERSCAN_API_KEY_{formatted_chain_name}",
+                ),
             },
         }
 

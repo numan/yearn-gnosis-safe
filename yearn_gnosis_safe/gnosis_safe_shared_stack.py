@@ -61,11 +61,13 @@ class GnosisSafeSharedStack(cdk.Stack):
                         "TX_DATABASE_URL_MAINNET": "",
                         "TX_ETHEREUM_NODE_URL_MAINNET": "",
                         "TX_ETHEREUM_TRACING_NODE_URL_MAINNET": "",
+                        "TX_ETHERSCAN_API_KEY_MAINNET": "",
                         # Rinkeby
                         "TX_DJANGO_SECRET_KEY_RINKEBY": "",
                         "TX_DATABASE_URL_RINKEBY": "",
                         "TX_ETHEREUM_NODE_URL_RINKEBY": "",
                         "TX_ETHEREUM_TRACING_NODE_URL_RINKEBY": "",
+                        "TX_ETHERSCAN_API_KEY_RINKEBY": "",
                         # Configuration Service
                         "CFG_SECRET_KEY": "",
                         "CFG_DJANGO_SUPERUSER_USERNAME": "",

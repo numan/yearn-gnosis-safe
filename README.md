@@ -163,7 +163,9 @@ Fill out the following credentials in the Shared Secrets vault:
   17. CGW_ROCKET_SECRET_KEY - Generate randomly using `date |md5 | head -c24; echo`
   18. UI_REACT_APP_ETHGASSTATION_API_KEY - Your Eth Gas Station API key
   19. CGW_WEBHOOK_TOKEN - Generate randomly using `date |md5 | head -c24; echo`
-  20. password - Not used. Leave as is.
+  20. TX_ETHERSCAN_API_KEY_MAINNET - Your Etherscan API key for mainnet transaction service
+  21. TX_ETHERSCAN_API_KEY_RINKEBY - Your Etherscan API key for rinkeby transaction service
+  22. password - Not used. Leave as is.
 
   ### 2. Build production bundle of the Gnosis Safe UI
 

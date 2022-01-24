@@ -57,6 +57,8 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
                 "REDIS_URI": self.redis_connection_string,
                 "EXCHANGE_API_BASE_URI": "http://api.exchangeratesapi.io/latest",
                 "VPC_TRANSACTION_SERVICE_URI": "false",
+                "TX_QUEUED_CACHE_DURATION": "1000",
+                "REQUEST_CACHE_DURATION": "10000",
             },
             "secrets": {
                 "ROCKET_SECRET_KEY": ecs.Secret.from_secrets_manager(
