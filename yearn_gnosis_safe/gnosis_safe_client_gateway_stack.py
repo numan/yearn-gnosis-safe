@@ -59,6 +59,9 @@ class GnosisSafeClientGatewayStack(cdk.Stack):
                 "VPC_TRANSACTION_SERVICE_URI": "false",
                 "TX_QUEUED_CACHE_DURATION": "1000",
                 "REQUEST_CACHE_DURATION": "10000",
+                "INDEFINITE_TIMEOUT": "5000",
+                "SHORT_ERROR_DURATION": "1000",
+                "LONG_ERROR_DURATION": "5000",
             },
             "secrets": {
                 "ROCKET_SECRET_KEY": ecs.Secret.from_secrets_manager(
