@@ -87,7 +87,7 @@ class ErigonEthereumStack(cdk.Stack):
                 "--healthcheck",
             ],
             port_mappings=[
-                ecs.PortMapping(container_port=30303),  # listner / discovery
+                ecs.PortMapping(container_port=30303),  # listener / discovery
                 ecs.PortMapping(
                     container_port=30303, protocol=ecs.Protocol.UDP
                 ),  # listner / discovery

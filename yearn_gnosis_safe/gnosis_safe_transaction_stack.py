@@ -57,6 +57,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
                 "DJANGO_ALLOWED_HOSTS": "*",
                 "DB_MAX_CONNS": "15",
                 "ETH_INTERNAL_TXS_BLOCK_PROCESS_LIMIT": "5000",
+                "AWS_S3_PUBLIC_URL": "https://safe-transaction-assets.gnosis-safe.io"
             },
             "secrets": {
                 "DJANGO_SECRET_KEY": ecs.Secret.from_secrets_manager(
