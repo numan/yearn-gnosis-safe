@@ -3,7 +3,8 @@ from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_logs as logs
-from aws_cdk import core as cdk
+import aws_cdk as cdk
+from constructs import Construct
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 
@@ -11,7 +12,7 @@ from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 class ErigonEthereumStack(cdk.Stack):
     def __init__(
         self,
-        scope: cdk.Construct,
+        scope: Construct,
         construct_id: str,
         vpc: ec2.Vpc,
         chain_name: str = "rinkeby",

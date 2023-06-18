@@ -1,6 +1,7 @@
 from typing import Optional, Union
 from aws_cdk import aws_ec2 as ec2
-from aws_cdk import core as cdk
+import aws_cdk as cdk
+from constructs import Construct
 
 from yearn_gnosis_safe.gnosis_safe_client_gateway_stack import \
     GnosisSafeClientGatewayStack
@@ -15,7 +16,7 @@ from yearn_gnosis_safe.gnosis_safe_ui_stack import GnosisSafeUIStack
 class YearnGnosisSafeStack(cdk.Stack):
     def __init__(
         self,
-        scope: cdk.Construct,
+        scope: Construct,
         construct_id: str,
         environment_name: str,
         ui_subdomain: Union[str, None],

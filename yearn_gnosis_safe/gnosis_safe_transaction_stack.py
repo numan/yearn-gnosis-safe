@@ -3,8 +3,9 @@ from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_rds as rds
-from aws_cdk import core as cdk
+import aws_cdk as cdk
 from jsii import Number
+from constructs import Construct
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 from yearn_gnosis_safe.redis_stack import RedisStack
@@ -17,7 +18,7 @@ class GnosisSafeTransactionStack(cdk.Stack):
 
     def __init__(
         self,
-        scope: cdk.Construct,
+        scope: Construct,
         construct_id: str,
         vpc: ec2.IVpc,
         shared_stack: GnosisSafeSharedStack,

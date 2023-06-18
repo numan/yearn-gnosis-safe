@@ -1,8 +1,9 @@
 from typing import Optional, Sequence
 from aws_cdk import aws_ec2 as ec2
-from aws_cdk import core as cdk
+import aws_cdk as cdk
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3_deployment
+from constructs import Construct
 
 from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 
@@ -10,7 +11,7 @@ from yearn_gnosis_safe.gnosis_safe_shared_stack import GnosisSafeSharedStack
 class GnosisSafeUIStack(cdk.Stack):
     def __init__(
         self,
-        scope: cdk.Construct,
+        scope: Construct,
         construct_id: str,
         environment_name: str,
         shared_stack: GnosisSafeSharedStack,
