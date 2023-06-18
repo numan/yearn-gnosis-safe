@@ -1,14 +1,15 @@
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_elasticache as elasticache
-from aws_cdk import core as cdk
+import aws_cdk as cdk
+from constructs import Construct
 
 
-class RedisStack(cdk.Construct):
+class RedisStack(Construct):
     @property
     def connections(self):
         return self._connections
 
-    def __init__(self, scope: cdk.Construct, id: str, vpc: ec2.IVpc, cache_node_type: str="cache.t3.small") -> None:
+    def __init__(self, scope: Construct, id: str, vpc: ec2.IVpc, cache_node_type: str="cache.t3.small") -> None:
         super().__init__(scope, id)
 
         sg_elasticache = ec2.SecurityGroup(

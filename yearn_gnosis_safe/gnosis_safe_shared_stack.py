@@ -5,7 +5,8 @@ from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_logs as logs
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_secretsmanager as secretsmanager
-from aws_cdk import core as cdk
+import aws_cdk as cdk
+from constructs import Construct
 
 
 class GnosisSafeSharedStack(cdk.Stack):
@@ -43,7 +44,7 @@ class GnosisSafeSharedStack(cdk.Stack):
 
     def __init__(
         self,
-        scope: cdk.Construct,
+        scope: Construct,
         construct_id: str,
         vpc: ec2.IVpc,
         **kwargs,

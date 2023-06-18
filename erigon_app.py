@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os
 
-from aws_cdk import core as cdk
+import aws_cdk as cdk
 from aws_cdk import aws_ec2 as ec2
+from constructs import Construct
 
 from yearn_gnosis_safe.erigon_stack import ErigonEthereumStack
 
@@ -10,7 +11,7 @@ app = cdk.App()
 
 
 class AppStack(cdk.Stack):
-    def __init__(self, scope: cdk.Construct, id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         vpc_id = os.environ.get("CDK_DEPLOY_VPC")

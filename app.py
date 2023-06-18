@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-from aws_cdk import core as cdk
+import aws_cdk as cdk
 
 from yearn_gnosis_safe.yearn_gnosis_safe_stack import YearnGnosisSafeStack
 
